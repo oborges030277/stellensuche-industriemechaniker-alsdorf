@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stellensuche &mdash; industriemechaniker_alsdorf</title>
+<style>
+:root {
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --accent: #4a9eff;
+  --accent-hover: #6bb3ff;
+  --green: #00d68f;
+  --red: #ff4444;
+  --yellow: #ffc107;
+  --text: #ffffff;
+  --text-dim: rgba(255, 255, 255, 0.6);
+  --text-muted: rgba(255, 255, 255, 0.35);
+  --transition: 0.3s ease;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0a0a1a 100%);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  padding: 1em;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
+
+.container { max-width: 960px; margin: 0 auto; }
+
+h1 { font-size: 1.4em; font-weight: 700; margin-bottom: 0.3em; }
+
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5em;
+  margin-bottom: 1em;
+}
+
+.meta { color: var(--text-dim); font-size: 0.85em; }
+
+.build-info {
+  color: var(--text-muted);
+  font-size: 0.75em;
+  margin-top: -0.2em;
+  margin-bottom: 0.8em;
+}
+
+.map-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  background: rgba(74,158,255,0.15);
+  border: 1px solid rgba(74,158,255,0.4);
+  color: var(--accent);
+  padding: 10px 16px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9em;
+  margin-bottom: 1em;
+  transition: all var(--transition);
+}
+
+.map-btn:hover {
+  background: rgba(74,158,255,0.25);
+  color: var(--accent-hover);
+}
+
+.map-btn .ic { font-size: 1.15em; }
+
+.sync-status {
+  font-size: 0.75em;
+  color: var(--text-muted);
+  align-self: center;
+  padding: 0 4px;
+}
+.sync-status.ok { color: var(--green); }
+.sync-status.busy { color: var(--yellow); }
+.sync-status.err { color: var(--red); }
+
+/* Filter toolbar */
+.toolbar {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.toolbar .tb {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  color: var(--text-dim);
+  font-size: 0.75em;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.toolbar .tb:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text);
+}
+
+.toolbar .tb.active {
+  background: rgba(74, 158, 255, 0.2);
+  border-color: rgba(74, 158, 255, 0.4);
+  color: var(--accent);
+}
+
+.source-group { margin-bottom: 1.5em; }
+
+.source-group h2 {
+  font-size: 1em;
+  font-weight: 600;
+  color: var(--accent);
+  padding: 0.4em 0;
+  border-bottom: 1px solid var(--glass-border);
+  margin-bottom: 0.4em;
+}
+
+.source-group h2 .count { color: var(--text-muted); font-weight: 400; }
+
+/* Job row — works on desktop and mobile */
+.job-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin: 3px 0;
+  background: var(--glass-bg);
+  border: 1px solid transparent;
+  border-radius: 10px;
+  transition: all var(--transition);
+}
+
+.job-row:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--glass-border);
+}
+
+.job-row.is-dismissed {
+  opacity: 0.35;
+}
+
+.job-row.is-dismissed .job-title {
+  text-decoration: line-through;
+}
+
+.job-row.is-dismissed .btn-dismiss {
+  color: var(--red);
+  border-color: rgba(255, 68, 68, 0.4);
+  background: rgba(255, 68, 68, 0.15);
+}
+
+
+.hidden { display: none; }
+
+.job-link {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  color: var(--text);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.job-link:hover { color: var(--accent-hover); }
+
+.job-title {
+  font-weight: 600;
+  font-size: 0.9em;
+  line-height: 1.3;
+  /* Allow wrapping on mobile */
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.job-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  font-size: 0.75em;
+  color: var(--text-dim);
+  flex-wrap: wrap;
+}
+
+.job-loc { color: var(--text-muted); }
+
+.job-date { color: var(--text-muted); }
+
+.warn { color: var(--red); font-size: 0.85em; font-weight: 600; }
+
+/* Action buttons — always visible, touch-friendly */
+.job-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-shrink: 0;
+  padding: 4px 6px;
+}
+
+.btn-action {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 1.1em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: hover) {
+  .btn-action:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+  .btn-dismiss:hover {
+    color: var(--red);
+    border-color: rgba(255, 68, 68, 0.4);
+    background: rgba(255, 68, 68, 0.15);
+  }
+}
+
+.btn-action:active {
+  transform: scale(0.9);
+}
+
+.btn-fav.active {
+  color: var(--yellow);
+  border-color: rgba(255, 193, 7, 0.4);
+  background: rgba(255, 193, 7, 0.15);
+}
+
+.btn-maps {
+  font-size: 0.9em;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.container { animation: fadeIn 0.4s ease forwards; }
+
+/* Desktop: title on one line */
+@media (min-width: 641px) {
+  .job-link {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1em;
+  }
+  .job-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
+  }
+  .job-meta {
+    flex-wrap: nowrap;
+    flex-shrink: 0;
+  }
+  .job-actions {
+    flex-direction: row;
+    gap: 3px;
+    padding: 4px 8px;
+  }
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Stellensuche &mdash; industriemechaniker_alsdorf</h1>
+<div class="build-info">Gebaut: 19.04.2026 16:27 · Daten: 0.3 h alt</div>
+<a href="karte.html" class="map-btn"><span class="ic">&#128506;</span> Karte mit allen Stellen</a>
+<div class="header-row">
+  <span class="meta">25 Treffer</span>
+  <div class="toolbar">
+    <button class="tb" onclick="filterView('all')" id="tb-all">Alle</button>
+    <button class="tb" onclick="filterView('unmarked')" id="tb-unmarked">Unmarkierte</button>
+    <button class="tb" onclick="filterView('favs')" id="tb-favs">★ Merkliste</button>
+    <button class="tb" onclick="filterView('dismissed')" id="tb-dismissed">✕ Aussortiert</button>
+    <button class="tb" onclick="setupGistSync()" id="tb-sync"
+            title="Markierungen mit GitHub Gist synchronisieren">↻ Sync</button>
+    <span id="sync-status" class="sync-status"></span>
+  </div>
+</div>
+<div class="source-group"><h2>karriere_nrw <span class="count">(1)</span></h2><div class="job-row" id="job-1bbf87604677"><a href="https://karriere.nrw/stellenausschreibung/7bead575-ee17-41f1-a150-526a94fe3254" target="_blank" class="job-link"><span class="job-title">1) Elektroniker/-in (m/w/d) oder Mechatroniker/-in (m/w/d) für die Unterhaltung der Sonderbauwerke im Unternehmensbereich West</span><span class="job-meta"><span class="job-company">Wasserverband Eifel-Rur</span><span class="job-loc">52070 Aachen (11 km)</span><span class="job-date">19.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'1bbf87604677')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'1bbf87604677')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('52070 Aachen')" title="Route in Google Maps">🗺</button></div></div></div>
+<div class="source-group"><h2>arbeitsagentur <span class="count">(24)</span></h2><div class="job-row" id="job-6951ef421edc"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/16918-C3W8DJY71AJJ085H-S" target="_blank" class="job-link"><span class="job-title">2) Industriemechaniker (M/W/D)</span><span class="job-meta"><span class="job-company">PersEH  GmbH</span><span class="job-loc">52372 Kreuzau (27 km)</span><span class="job-date">19.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'6951ef421edc')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'6951ef421edc')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('52372 Kreuzau')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-1a713eed681d"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002903195-S" target="_blank" class="job-link"><span class="job-title">3) Industriemechaniker</span><span class="job-meta"><span class="job-company">Drehmo Industrietechnik GmbH</span><span class="job-loc">52372 Kreuzau (27 km)</span><span class="job-date">19.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'1a713eed681d')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'1a713eed681d')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('52372 Kreuzau')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-43783c6e9bfd"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/11852-933842229-S" target="_blank" class="job-link"><span class="job-title">4) Industriemechaniker (m/w/d)</span><span class="job-meta"><span class="job-company">TimePartner Personalmanagement GmbH</span><span class="job-loc">52351 Düren, Rheinland (25 km)</span><span class="job-date">19.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'43783c6e9bfd')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'43783c6e9bfd')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('52351 Düren, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-74579c062741"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/12122-204304-1757440-0-S" target="_blank" class="job-link"><span class="job-title">5) Industriemechaniker (m/w/d)</span><span class="job-meta"><span class="job-company">persona service AG &amp; Co. KG Beratung Leasing Vermittlung</span><span class="job-loc">52349 Düren, Rheinland (24 km)</span><span class="job-date">19.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'74579c062741')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'74579c062741')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('52349 Düren, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-0bff8eabc451"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002510685-S" target="_blank" class="job-link"><span class="job-title">6) Industriemechaniker (m/w/d)</span><span class="job-meta"><span class="job-company">DirectDa Personal West GmbH</span><span class="job-loc">Düren, Rheinland (22 km)</span><span class="job-date">19.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'0bff8eabc451')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'0bff8eabc451')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('Düren, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-cae40ff74be4"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/13424-21L5FW5L3W0DX3W7-S" target="_blank" class="job-link"><span class="job-title">7)  Industriemechaniker/Mechatroniker (m/w/d)</span><span class="job-meta"><span class="job-company">AUREA GmbH</span><span class="job-loc">50189 Elsdorf, Rheinland (29 km)</span><span class="job-date">19.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'cae40ff74be4')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'cae40ff74be4')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('50189 Elsdorf, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-4a41e97d7e2b"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/12122-207466-1766839-0-S" target="_blank" class="job-link"><span class="job-title">8) Industriemechaniker (m/w/d)</span><span class="job-meta"><span class="job-company">persona service AG &amp; Co. KG</span><span class="job-loc">50259 Pulheim (47 km)</span><span class="job-date">19.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'4a41e97d7e2b')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'4a41e97d7e2b')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('50259 Pulheim')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-9a3773719590"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/12122-206809-1765107-0-S" target="_blank" class="job-link"><span class="job-title">9) Industriemechaniker (m/w/d)</span><span class="job-meta"><span class="job-company">Persona Service AG &amp; Co KG</span><span class="job-loc">50226 Frechen (46 km)</span><span class="job-date">19.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'9a3773719590')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'9a3773719590')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('50226 Frechen')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-5fa04e402712"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002896288-S" target="_blank" class="job-link"><span class="job-title">10) Industriemechaniker (m/w/d)</span><span class="job-meta"><span class="job-company">Expert Select GmbH</span><span class="job-loc">Köln (48 km)</span><span class="job-date">19.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'5fa04e402712')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'5fa04e402712')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('Köln')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-9440e13bc1b3"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/12461-8af161874c62487-S" target="_blank" class="job-link"><span class="job-title">11) Industriemechaniker (m/w/d) 20 €</span><span class="job-meta"><span class="job-company">meteor Personaldienste AG &amp; Co. KGaA</span><span class="job-loc">50170 Kerpen, Rheinland (36 km)</span><span class="job-date">19.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'9440e13bc1b3')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'9440e13bc1b3')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('50170 Kerpen, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-6c95f8539387"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/16536-977457db75018a1a-S" target="_blank" class="job-link"><span class="job-title">12) Industriemechaniker (m/w/d)</span><span class="job-meta"><span class="job-company">Cichon Personalmanagement GmbH Bergheim</span><span class="job-loc">50126 Bergheim, Erft (34 km)</span><span class="job-date">19.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'6c95f8539387')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'6c95f8539387')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('50126 Bergheim, Erft')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-ade5f5528189"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10000-1188169594-S" target="_blank" class="job-link"><span class="job-title">13) Industriemechaniker (m/w/d)</span><span class="job-meta"><span class="job-company">EDO Personalservice GmbH</span><span class="job-loc">Köln (48 km)</span><span class="job-date">19.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'ade5f5528189')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'ade5f5528189')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('Köln')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-075f47c3ebf3"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/12122-203963-1756680-0-S" target="_blank" class="job-link"><span class="job-title">14) Industriemechaniker (m/w/d)</span><span class="job-meta"><span class="job-company">persona service AG &amp; Co. KG Beratung Leasing Vermittlung</span><span class="job-loc">50127 Bergheim, Erft (36 km)</span><span class="job-date">19.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'075f47c3ebf3')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'075f47c3ebf3')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('50127 Bergheim, Erft')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-d4e54f5323d9"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002937534-S" target="_blank" class="job-link"><span class="job-title">15) Industriemechaniker als Allrounder (m/w/d)</span><span class="job-meta"><span class="job-company">Jasper Industriehydraulik GmbH &amp; Co. KG</span><span class="job-loc">50226 Frechen (46 km)</span><span class="job-date">19.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'d4e54f5323d9')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'d4e54f5323d9')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('50226 Frechen')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-c10adfe5c7bd"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/13643-607321LS-S" target="_blank" class="job-link"><span class="job-title">16) Industriemechaniker (m/w/d) Neuss</span><span class="job-meta"><span class="job-company">Michael Page GmbH</span><span class="job-loc">Neuss (49 km)</span><span class="job-date">19.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'c10adfe5c7bd')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'c10adfe5c7bd')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('Neuss')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-6f874d95cfd4"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1001799067-S" target="_blank" class="job-link"><span class="job-title">17) Industriemechaniker (m/w/d)</span><span class="job-meta"><span class="job-company">Frisco One GmbH</span><span class="job-loc">50259 Pulheim (47 km)</span><span class="job-date">19.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'6f874d95cfd4')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'6f874d95cfd4')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('50259 Pulheim')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-9a87028f71c4"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/12122-151423-1591354-0-S" target="_blank" class="job-link"><span class="job-title">18) Industriemechaniker (m/w/d)</span><span class="job-meta"><span class="job-company">persona service AG &amp; Co. KG</span><span class="job-loc">50859 Köln (48 km)</span><span class="job-date">19.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'9a87028f71c4')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'9a87028f71c4')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('50859 Köln')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-1eeae5a878f1"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/14526-3FY33BHQ4VF1V2DM-S" target="_blank" class="job-link"><span class="job-title">19) Industriemechaniker (m/w/d)</span><span class="job-meta"><span class="job-company">Rose Zeitarbeit GmbH</span><span class="job-loc">41464 Neuss (50 km)</span><span class="job-date">19.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'1eeae5a878f1')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'1eeae5a878f1')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('41464 Neuss')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-4af93c7044c8"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/11119-4758034803-S" target="_blank" class="job-link"><span class="job-title">20) Industriemechaniker (m/w/d)</span><span class="job-meta"><span class="job-company">Herrmann Personaldienste GmbH</span><span class="job-loc">50129 Bergheim, Erft (38 km)</span><span class="job-date">19.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'4af93c7044c8')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'4af93c7044c8')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('50129 Bergheim, Erft')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-2bc868aeeafe"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/16918-EZWCBPLH9CKJ2SVS-S" target="_blank" class="job-link"><span class="job-title">21) Industriemechaniker (m/w/d)</span><span class="job-meta"><span class="job-company">PersEH  GmbH</span><span class="job-loc">50170 Kerpen, Rheinland (36 km)</span><span class="job-date">19.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'2bc868aeeafe')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'2bc868aeeafe')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('50170 Kerpen, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-1f459060149a"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002732423-S" target="_blank" class="job-link"><span class="job-title">22) Industriemechaniker (m/w/d)</span><span class="job-meta"><span class="job-company">Holcim (Deutschland) GmbH Hauptverwaltung</span><span class="job-loc">50169 Kerpen, Rheinland (41 km)</span><span class="job-date">19.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'1f459060149a')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'1f459060149a')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('50169 Kerpen, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-95b6493ae82d"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/12122-178663-1690567-0-S" target="_blank" class="job-link"><span class="job-title">23) Industriemechaniker (m/w/d)</span><span class="job-meta"><span class="job-company">Persona Service AG &amp; Co KG</span><span class="job-loc">50374 Erftstadt (45 km)</span><span class="job-date">19.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'95b6493ae82d')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'95b6493ae82d')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('50374 Erftstadt')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-2982158ecc9c"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/12122-141877-1594788-0-S" target="_blank" class="job-link"><span class="job-title">24) Industriemechaniker (m/w/d)</span><span class="job-meta"><span class="job-company">Persona Service AG &amp; Co KG</span><span class="job-loc">50374 Erftstadt (45 km)</span><span class="job-date">19.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'2982158ecc9c')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'2982158ecc9c')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('50374 Erftstadt')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-17a59d638916"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002752080-S" target="_blank" class="job-link"><span class="job-title">25) Industriemechaniker (m/w/d)</span><span class="job-meta"><span class="job-company">A &amp; D Personaldienstleistungen e. K.</span><span class="job-loc">Flörsheim am Main</span><span class="job-date">19.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'17a59d638916')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'17a59d638916')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('Flörsheim am Main')" title="Route in Google Maps">🗺</button></div></div></div>
+</div>
+<script>
+var API = 'http://192.168.1.67:8517';
+var HOME = 'Alsdorf Zentrum, 52477 Alsdorf';
+var PROFILE = 'industriemechaniker_alsdorf';
+var currentFilter = 'all';
+// Offline-Modus: wenn API-Calls fehlschlagen (z.B. GitHub-Pages), fallback auf LocalStorage.
+// Beim ersten fehlgeschlagenen Call bleibt die Flag gesetzt.
+var OFFLINE = false;
+var LS_KEY = 'stellensuche-marks::' + PROFILE;
+
+function _loadMarks() {
+  try {
+    var raw = localStorage.getItem(LS_KEY);
+    return raw ? JSON.parse(raw) : {favorites: [], dismissed: []};
+  } catch (e) {
+    return {favorites: [], dismissed: []};
+  }
+}
+
+function _saveMarks(marks) {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(marks)); } catch (e) {}
+}
+
+function _recordMark(jobId, kind, value) {
+  // kind: 'favorite' | 'dismissed'; value: true/false
+  var marks = _loadMarks();
+  var list = marks[kind === 'favorite' ? 'favorites' : 'dismissed'];
+  var idx = list.indexOf(jobId);
+  if (value && idx < 0) list.push(jobId);
+  if (!value && idx >= 0) list.splice(idx, 1);
+  _saveMarks(marks);
+  if (typeof _scheduleGistPush === 'function') _scheduleGistPush();
+}
+
+function apiCall(endpoint, body) {
+  return fetch(API + endpoint, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(body)
+  }).then(function(r) { return r.json(); }).catch(function() { OFFLINE = true; });
+}
+
+// ========== GitHub Gist Sync ==========
+// Speichert Markierungen in einem GitHub Gist, damit mehrere Geraete
+// (Smartphone unterwegs, Notebook zu Hause) den gleichen Stand sehen.
+var GIST_TOKEN_KEY = 'stellensuche-gh-token';
+var GIST_ID_KEY = 'stellensuche-gist-id::' + PROFILE;
+var GIST_FILENAME = 'stellensuche-marks-' + PROFILE + '.json';
+var _syncTimer = null;
+
+function _setSyncStatus(text, cls) {
+  var el = document.getElementById('sync-status');
+  if (!el) return;
+  el.textContent = text;
+  el.className = 'sync-status ' + (cls || '');
+}
+
+function _ghHeaders(token) {
+  return {
+    'Authorization': 'token ' + token,
+    'Accept': 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28'
+  };
+}
+
+async function _findOrCreateGist(token) {
+  // 1) Liste Gists und suche einen mit dem erwarteten Dateinamen
+  var resp = await fetch('https://api.github.com/gists?per_page=100', {headers: _ghHeaders(token)});
+  if (!resp.ok) throw new Error('Gist-Liste fehlgeschlagen: ' + resp.status);
+  var gists = await resp.json();
+  for (var i = 0; i < gists.length; i++) {
+    if (gists[i].files && gists[i].files[GIST_FILENAME]) {
+      return gists[i].id;
+    }
+  }
+  // 2) Nicht gefunden — neu anlegen (secret / nicht public)
+  var create = await fetch('https://api.github.com/gists', {
+    method: 'POST',
+    headers: _ghHeaders(token),
+    body: JSON.stringify({
+      description: 'Stellensuche-Markierungen Sync ({' + PROFILE + '})',
+      public: false,
+      files: _filesPayload(_loadMarks())
+    })
+  });
+  if (!create.ok) throw new Error('Gist-Anlage fehlgeschlagen: ' + create.status);
+  var obj = await create.json();
+  return obj.id;
+}
+
+function _filesPayload(marks) {
+  var enriched = {
+    favorites: marks.favorites || [],
+    dismissed: marks.dismissed || [],
+    profile: PROFILE,
+    synced_at: new Date().toISOString()
+  };
+  var out = {};
+  out[GIST_FILENAME] = {content: JSON.stringify(enriched, null, 2)};
+  return out;
+}
+
+async function _patchGist(token, gistId, marks) {
+  var resp = await fetch('https://api.github.com/gists/' + gistId, {
+    method: 'PATCH',
+    headers: _ghHeaders(token),
+    body: JSON.stringify({files: _filesPayload(marks)})
+  });
+  if (!resp.ok) throw new Error('Gist-Update fehlgeschlagen: ' + resp.status);
+}
+
+async function _pullGist(token, gistId) {
+  var resp = await fetch('https://api.github.com/gists/' + gistId, {headers: _ghHeaders(token)});
+  if (!resp.ok) throw new Error('Gist-Lesen fehlgeschlagen: ' + resp.status);
+  var obj = await resp.json();
+  var file = obj.files && obj.files[GIST_FILENAME];
+  if (!file) return null;
+  try { return JSON.parse(file.content); } catch (e) { return null; }
+}
+
+function setupGistSync() {
+  var token = localStorage.getItem(GIST_TOKEN_KEY);
+  if (!token) {
+    token = prompt('GitHub Personal Access Token mit Scope "gist" eingeben:');
+    if (!token) return;
+    localStorage.setItem(GIST_TOKEN_KEY, token);
+  }
+  _setSyncStatus('Sync wird eingerichtet...', 'busy');
+  _findOrCreateGist(token).then(function(gistId) {
+    localStorage.setItem(GIST_ID_KEY, gistId);
+    return _pullGist(token, gistId).then(function(remote) {
+      if (remote) _mergeRemoteMarks(remote);
+    }).then(function() { return _patchGist(token, gistId, _loadMarks()); });
+  }).then(function() {
+    _setSyncStatus('Sync aktiv', 'ok');
+  }).catch(function(err) {
+    _setSyncStatus('Sync-Fehler: ' + err.message, 'err');
+  });
+}
+
+function _mergeRemoteMarks(remote) {
+  // Merge remote → local (union). Beide Listen werden zusammengefuehrt.
+  var local = _loadMarks();
+  function union(a, b) {
+    var s = {};
+    (a || []).forEach(function(x) { s[x] = true; });
+    (b || []).forEach(function(x) { s[x] = true; });
+    return Object.keys(s);
+  }
+  local.favorites = union(local.favorites, remote.favorites);
+  local.dismissed = union(local.dismissed, remote.dismissed);
+  _saveMarks(local);
+  _applyLocalMarks();
+  applyFilter();
+}
+
+function _scheduleGistPush() {
+  var token = localStorage.getItem(GIST_TOKEN_KEY);
+  var gistId = localStorage.getItem(GIST_ID_KEY);
+  if (!token || !gistId) return;
+  if (_syncTimer) clearTimeout(_syncTimer);
+  _setSyncStatus('Sync laeuft...', 'busy');
+  _syncTimer = setTimeout(function() {
+    _patchGist(token, gistId, _loadMarks())
+      .then(function() { _setSyncStatus('Sync aktiv', 'ok'); })
+      .catch(function(err) { _setSyncStatus('Sync-Fehler: ' + err.message, 'err'); });
+  }, 1500);  // debounced 1.5s nach letzter Klick-Aktion
+}
+
+function _initGistSync() {
+  var token = localStorage.getItem(GIST_TOKEN_KEY);
+  var gistId = localStorage.getItem(GIST_ID_KEY);
+  if (!token || !gistId) {
+    _setSyncStatus('Sync nicht eingerichtet', '');
+    return;
+  }
+  _setSyncStatus('Sync wird abgeglichen...', 'busy');
+  _pullGist(token, gistId).then(function(remote) {
+    if (remote) _mergeRemoteMarks(remote);
+    _setSyncStatus('Sync aktiv', 'ok');
+  }).catch(function(err) {
+    _setSyncStatus('Sync-Fehler: ' + err.message, 'err');
+  });
+}
+
+var _lastClick = {};
+function _debounce(key) {
+  var now = Date.now();
+  if (_lastClick[key] && now - _lastClick[key] < 400) return true;
+  _lastClick[key] = now;
+  return false;
+}
+
+function openMaps(destination) {
+  var url = 'https://www.google.com/maps/dir/' + encodeURIComponent(HOME) + '/' + encodeURIComponent(destination);
+  window.open(url, '_blank');
+}
+
+function toggleFav(btn, jobId) {
+  if (_debounce('fav-' + jobId)) return;
+  var isActive = btn.classList.toggle('active');
+  btn.textContent = isActive ? '\u2605' : '\u2606';
+  _recordMark(jobId, 'favorite', isActive);  // immer lokal puffern
+  apiCall('/api/favorite', {job_id: jobId, value: isActive});
+  applyFilter();
+}
+
+function toggleDismiss(btn, jobId) {
+  if (_debounce('dis-' + jobId)) return;
+  var row = btn.closest('.job-row');
+  var isDismissed = row.classList.toggle('is-dismissed');
+  _recordMark(jobId, 'dismissed', isDismissed);  // immer lokal puffern
+  if (isDismissed) {
+    apiCall('/api/dismiss', {job_id: jobId});
+  } else {
+    apiCall('/api/undismiss', {job_id: jobId});
+  }
+  applyFilter();
+}
+
+function filterView(mode) {
+  currentFilter = mode;
+  document.querySelectorAll('.toolbar .tb').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('tb-' + mode).classList.add('active');
+  applyFilter();
+}
+
+function applyFilter() {
+  var rows = document.querySelectorAll('.job-row');
+  var counts = {all: 0, favs: 0, dismissed: 0, unmarked: 0};
+  rows.forEach(function(row) {
+    var isFav = row.querySelector('.btn-fav.active') !== null;
+    var isDis = row.classList.contains('is-dismissed');
+    counts.all++;
+    if (isFav) counts.favs++;
+    if (isDis) counts.dismissed++;
+    if (!isFav && !isDis) counts.unmarked++;
+    var show = true;
+    if (currentFilter === 'favs') show = isFav;
+    else if (currentFilter === 'dismissed') show = isDis;
+    else if (currentFilter === 'unmarked') show = !isFav && !isDis;
+    row.classList.toggle('hidden', !show);
+  });
+  document.querySelectorAll('.source-group').forEach(function(group) {
+    var visible = group.querySelectorAll('.job-row:not(.hidden)').length;
+    group.classList.toggle('hidden', visible === 0);
+  });
+  document.getElementById('tb-all').textContent = 'Alle (' + counts.all + ')';
+  document.getElementById('tb-unmarked').textContent = 'Unmarkierte (' + counts.unmarked + ')';
+  document.getElementById('tb-favs').textContent = '\u2605 Merkliste (' + counts.favs + ')';
+  document.getElementById('tb-dismissed').textContent = '\u2715 Aussortiert (' + counts.dismissed + ')';
+}
+
+function _applyFav(id) {
+  var row = document.getElementById('job-' + id);
+  if (!row) return;
+  var btn = row.querySelector('.btn-fav');
+  if (btn && !btn.classList.contains('active')) {
+    btn.classList.add('active');
+    btn.textContent = '\u2605';
+  }
+}
+
+function _applyDismiss(id) {
+  var row = document.getElementById('job-' + id);
+  if (row && !row.classList.contains('is-dismissed')) {
+    row.classList.add('is-dismissed');
+  }
+}
+
+function _applyLocalMarks() {
+  // Merge LocalStorage marks into the view — funktioniert auch im Offline-Modus (GitHub-Pages).
+  var marks = _loadMarks();
+  (marks.favorites || []).forEach(_applyFav);
+  (marks.dismissed || []).forEach(_applyDismiss);
+}
+
+function loadStates() {
+  fetch(API + '/api/states')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      (data.favorite_ids || []).forEach(_applyFav);
+      (data.dismissed_ids || []).forEach(_applyDismiss);
+      _applyLocalMarks();  // LocalStorage-Markierungen ebenfalls ueberlagern
+      applyFilter();
+    })
+    .catch(function() {
+      OFFLINE = true;
+      _applyLocalMarks();
+      applyFilter();
+    });
+}
+
+loadStates();
+filterView('all');
+_initGistSync();
+</script>
+</body>
+</html>

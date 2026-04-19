@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stellensuche Karte &mdash; industriemechaniker_alsdorf</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+  :root {
+    --bg: #0a0a1a;
+    --panel: rgba(255,255,255,0.08);
+    --border: rgba(255,255,255,0.15);
+    --accent: #4a9eff;
+    --text: #fff;
+    --text-dim: rgba(255,255,255,0.6);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    padding: 0.8em 1em;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.6em;
+  }
+  header h1 { font-size: 1.1em; }
+  header .meta { color: var(--text-dim); font-size: 0.85em; }
+  header a.back {
+    color: var(--accent);
+    text-decoration: none;
+    padding: 6px 12px;
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    font-size: 0.85em;
+  }
+  header a.back:hover { background: rgba(74,158,255,0.15); }
+  #map { flex: 1; }
+  .leaflet-popup-content-wrapper {
+    background: #1a1a2e;
+    color: var(--text);
+    border-radius: 8px;
+  }
+  .leaflet-popup-tip { background: #1a1a2e; }
+  .leaflet-popup-content a { color: var(--accent); }
+  .popup-title { font-weight: 600; margin-bottom: 4px; }
+  .popup-company { color: var(--text-dim); font-size: 0.85em; margin-bottom: 4px; }
+  .popup-loc { color: var(--text-dim); font-size: 0.8em; margin-bottom: 6px; }
+  .home-marker {
+    background: #e63946;
+    border: 3px solid #fff;
+    border-radius: 50%;
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    box-shadow: 0 0 0 4px rgba(230,57,70,0.4), 0 4px 12px rgba(0,0,0,0.5);
+  }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Stellensuche Karte &mdash; industriemechaniker_alsdorf</h1>
+    <div class="meta">24 von 25 Stellen auf Karte &middot; 1 ohne Koord. &middot; Gebaut: 19.04.2026 16:27</div>
+  </div>
+  <a href="index.html" class="back">&larr; Zur Liste</a>
+</header>
+<div id="map"></div>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+var markers = [{"lat": 50.7884, "lon": 6.1044, "title": "Elektroniker/-in (m/w/d) oder Mechatroniker/-in (m/w/d) für die Unterhaltung der Sonderbauwerke im Unternehmensbereich West", "company": "Wasserverband Eifel-Rur", "location": "52070 Aachen", "url": "https://karriere.nrw/stellenausschreibung/7bead575-ee17-41f1-a150-526a94fe3254", "source": "karriere_nrw"}, {"lat": 50.747, "lon": 6.4907, "title": "Industriemechaniker (M/W/D)", "company": "PersEH  GmbH", "location": "52372 Kreuzau", "url": "https://www.arbeitsagentur.de/jobsuche/jobdetail/16918-C3W8DJY71AJJ085H-S", "source": "arbeitsagentur"}, {"lat": 50.747, "lon": 6.4907, "title": "Industriemechaniker", "company": "Drehmo Industrietechnik GmbH", "location": "52372 Kreuzau", "url": "https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002903195-S", "source": "arbeitsagentur"}, {"lat": 50.8086, "lon": 6.4982, "title": "Industriemechaniker (m/w/d)", "company": "TimePartner Personalmanagement GmbH", "location": "52351 Düren, Rheinland", "url": "https://www.arbeitsagentur.de/jobsuche/jobdetail/11852-933842229-S", "source": "arbeitsagentur"}, {"lat": 50.8009, "lon": 6.4788, "title": "Industriemechaniker (m/w/d)", "company": "persona service AG & Co. KG Beratung Leasing Vermittlung", "location": "52349 Düren, Rheinland", "url": "https://www.arbeitsagentur.de/jobsuche/jobdetail/12122-204304-1757440-0-S", "source": "arbeitsagentur"}, {"lat": 50.8074, "lon": 6.4762249999999995, "title": "Industriemechaniker (m/w/d)", "company": "DirectDa Personal West GmbH", "location": "Düren, Rheinland", "url": "https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002510685-S", "source": "arbeitsagentur"}, {"lat": 50.9374, "lon": 6.5683, "title": " Industriemechaniker/Mechatroniker (m/w/d)", "company": "AUREA GmbH", "location": "50189 Elsdorf, Rheinland", "url": "https://www.arbeitsagentur.de/jobsuche/jobdetail/13424-21L5FW5L3W0DX3W7-S", "source": "arbeitsagentur"}, {"lat": 50.9996, "lon": 6.8063, "title": "Industriemechaniker (m/w/d)", "company": "persona service AG & Co. KG", "location": "50259 Pulheim", "url": "https://www.arbeitsagentur.de/jobsuche/jobdetail/12122-207466-1766839-0-S", "source": "arbeitsagentur"}, {"lat": 50.9149, "lon": 6.8118, "title": "Industriemechaniker (m/w/d)", "company": "Persona Service AG & Co KG", "location": "50226 Frechen", "url": "https://www.arbeitsagentur.de/jobsuche/jobdetail/12122-206809-1765107-0-S", "source": "arbeitsagentur"}, {"lat": 50.94036444444445, "lon": 6.960577777777778, "title": "Industriemechaniker (m/w/d)", "company": "Expert Select GmbH", "location": "Köln", "url": "https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002896288-S", "source": "arbeitsagentur"}, {"lat": 50.8964, "lon": 6.6829, "title": "Industriemechaniker (m/w/d) 20 €", "company": "meteor Personaldienste AG & Co. KGaA", "location": "50170 Kerpen, Rheinland", "url": "https://www.arbeitsagentur.de/jobsuche/jobdetail/12461-8af161874c62487-S", "source": "arbeitsagentur"}, {"lat": 50.9562, "lon": 6.6349, "title": "Industriemechaniker (m/w/d)", "company": "Cichon Personalmanagement GmbH Bergheim", "location": "50126 Bergheim, Erft", "url": "https://www.arbeitsagentur.de/jobsuche/jobdetail/16536-977457db75018a1a-S", "source": "arbeitsagentur"}, {"lat": 50.94036444444445, "lon": 6.960577777777778, "title": "Industriemechaniker (m/w/d)", "company": "EDO Personalservice GmbH", "location": "Köln", "url": "https://www.arbeitsagentur.de/jobsuche/jobdetail/10000-1188169594-S", "source": "arbeitsagentur"}, {"lat": 50.9412, "lon": 6.6631, "title": "Industriemechaniker (m/w/d)", "company": "persona service AG & Co. KG Beratung Leasing Vermittlung", "location": "50127 Bergheim, Erft", "url": "https://www.arbeitsagentur.de/jobsuche/jobdetail/12122-203963-1756680-0-S", "source": "arbeitsagentur"}, {"lat": 50.9149, "lon": 6.8118, "title": "Industriemechaniker als Allrounder (m/w/d)", "company": "Jasper Industriehydraulik GmbH & Co. KG", "location": "50226 Frechen", "url": "https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002937534-S", "source": "arbeitsagentur"}, {"lat": 51.1845, "lon": 6.6989, "title": "Industriemechaniker (m/w/d) Neuss", "company": "Michael Page GmbH", "location": "Neuss", "url": "https://www.arbeitsagentur.de/jobsuche/jobdetail/13643-607321LS-S", "source": "arbeitsagentur"}, {"lat": 50.9996, "lon": 6.8063, "title": "Industriemechaniker (m/w/d)", "company": "Frisco One GmbH", "location": "50259 Pulheim", "url": "https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1001799067-S", "source": "arbeitsagentur"}, {"lat": 50.9535, "lon": 6.8328, "title": "Industriemechaniker (m/w/d)", "company": "persona service AG & Co. KG", "location": "50859 Köln", "url": "https://www.arbeitsagentur.de/jobsuche/jobdetail/12122-151423-1591354-0-S", "source": "arbeitsagentur"}, {"lat": 51.1843, "lon": 6.6821, "title": "Industriemechaniker (m/w/d)", "company": "Rose Zeitarbeit GmbH", "location": "41464 Neuss", "url": "https://www.arbeitsagentur.de/jobsuche/jobdetail/14526-3FY33BHQ4VF1V2DM-S", "source": "arbeitsagentur"}, {"lat": 50.9741, "lon": 6.6794, "title": "Industriemechaniker (m/w/d)", "company": "Herrmann Personaldienste GmbH", "location": "50129 Bergheim, Erft", "url": "https://www.arbeitsagentur.de/jobsuche/jobdetail/11119-4758034803-S", "source": "arbeitsagentur"}, {"lat": 50.8964, "lon": 6.6829, "title": "Industriemechaniker (m/w/d)", "company": "PersEH  GmbH", "location": "50170 Kerpen, Rheinland", "url": "https://www.arbeitsagentur.de/jobsuche/jobdetail/16918-EZWCBPLH9CKJ2SVS-S", "source": "arbeitsagentur"}, {"lat": 50.8748, "lon": 6.7435, "title": "Industriemechaniker (m/w/d)", "company": "Holcim (Deutschland) GmbH Hauptverwaltung", "location": "50169 Kerpen, Rheinland", "url": "https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002732423-S", "source": "arbeitsagentur"}, {"lat": 50.8148, "lon": 6.7939, "title": "Industriemechaniker (m/w/d)", "company": "Persona Service AG & Co KG", "location": "50374 Erftstadt", "url": "https://www.arbeitsagentur.de/jobsuche/jobdetail/12122-178663-1690567-0-S", "source": "arbeitsagentur"}, {"lat": 50.8148, "lon": 6.7939, "title": "Industriemechaniker (m/w/d)", "company": "Persona Service AG & Co KG", "location": "50374 Erftstadt", "url": "https://www.arbeitsagentur.de/jobsuche/jobdetail/12122-141877-1594788-0-S", "source": "arbeitsagentur"}];
+var homeLat = 50.8767;
+var homeLon = 6.164;
+var radiusM = 30000;
+var radius2M = 50000;
+var map = L.map('map').setView([50.8767, 6.164], 9);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 18,
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+}).addTo(map);
+if (homeLat !== null && homeLon !== null) {
+  // Radius-Ringe ZUERST (damit Marker darueber liegt)
+  if (radius2M !== null) {
+    L.circle([homeLat, homeLon], {
+      radius: radius2M,
+      color: '#ffc107', weight: 2, opacity: 0.6,
+      fillColor: '#ffc107', fillOpacity: 0.04,
+      interactive: false
+    }).addTo(map).bindTooltip('50 km (Warnradius)', {permanent:false});
+  }
+  if (radiusM !== null) {
+    L.circle([homeLat, homeLon], {
+      radius: radiusM,
+      color: '#00d68f', weight: 2, opacity: 0.7,
+      fillColor: '#00d68f', fillOpacity: 0.06,
+      interactive: false
+    }).addTo(map).bindTooltip('30 km (Trefferradius)', {permanent:false});
+  }
+  L.marker([homeLat, homeLon], {
+    icon: L.divIcon({
+      html: '<div class="home-marker">&#127968;</div>',
+      className: '',
+      iconSize: [36, 36],
+      iconAnchor: [18, 18]
+    }),
+    zIndexOffset: 1000
+  }).addTo(map).bindPopup('<b>Heimatadresse</b>').openPopup();
+}
+markers.forEach(function(m) {
+  var popup = '<div class="popup-title">' + m.title + '</div>'
+            + '<div class="popup-company">' + m.company + '</div>'
+            + '<div class="popup-loc">' + m.location + ' &middot; ' + m.source + '</div>'
+            + '<a href="' + m.url + '" target="_blank">Stellenanzeige &rarr;</a>';
+  L.marker([m.lat, m.lon]).addTo(map).bindPopup(popup);
+});
+</script>
+</body>
+</html>
