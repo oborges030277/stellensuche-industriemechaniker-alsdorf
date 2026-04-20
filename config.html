@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Konfiguration — Industriemechaniker_Alsdorf</title>
+<style>
+:root {
+  --bg: #0a0a1a;
+  --card: rgba(255,255,255,0.04);
+  --border: rgba(255,255,255,0.1);
+  --text: #ffffff;
+  --text-dim: rgba(255,255,255,0.6);
+  --accent: #4a9eff;
+  --green: #00d68f;
+  --red: #ff6b6b;
+  --yellow: #ffc107;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0a0a1a 100%);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 1em;
+  -webkit-font-smoothing: antialiased;
+}
+.container { max-width: 960px; margin: 0 auto; }
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1em; margin-bottom: 1em; flex-wrap: wrap;
+}
+h1 { font-size: 1.4em; }
+h2 { font-size: 1.1em; margin: 1.5em 0 0.5em; color: var(--accent); }
+h3 { font-size: 0.9em; margin: 0.8em 0 0.4em; color: var(--text-dim); font-weight: 500; }
+p.lead { color: var(--text-dim); margin-bottom: 0.8em; }
+.back-link {
+  display: inline-block; padding: 0.5em 1em; background: var(--card);
+  border: 1px solid var(--border); border-radius: 8px;
+  color: var(--text); text-decoration: none; font-size: 0.85em;
+}
+.back-link:hover { background: rgba(255,255,255,0.08); }
+.section {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px; padding: 1em 1.2em; margin-bottom: 0.8em;
+}
+ul { padding-left: 1.4em; color: var(--text-dim); font-size: 0.9em; }
+ul li { margin: 0.15em 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 0.3em; }
+.chip {
+  display: inline-block; padding: 3px 10px; border-radius: 12px;
+  font-size: 0.78em; font-weight: 600; letter-spacing: 0.01em;
+}
+.chip-include { background: rgba(74,158,255,0.18); color: #b3d4ff; border: 1px solid rgba(74,158,255,0.3); }
+.chip-exclude { background: rgba(255,107,107,0.15); color: #ffb3b3; border: 1px solid rgba(255,107,107,0.3); }
+.chip-highlight { background: var(--green); color: #0a1410; }
+.empty { color: var(--text-dim); font-size: 0.85em; font-style: italic; }
+.source-card {
+  background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+  border-radius: 8px; padding: 0.8em; margin: 0.4em 0;
+}
+.source-head { display: flex; justify-content: space-between; align-items: baseline; gap: 0.5em; flex-wrap: wrap; }
+.source-head strong { font-size: 0.95em; }
+.source-head .flags { font-size: 0.7em; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; }
+.source-parser { font-size: 0.75em; color: var(--text-dim); margin: 0.2em 0 0.5em; }
+.source-parser code { background: rgba(0,0,0,0.3); padding: 1px 6px; border-radius: 4px; }
+.url-list { padding-left: 1.2em; }
+.url-list li { font-size: 0.78em; word-break: break-all; }
+.url-list a { color: var(--accent); text-decoration: none; }
+.url-list a:hover { text-decoration: underline; }
+.meta-table { width: 100%; font-size: 0.85em; border-collapse: collapse; }
+.meta-table th {
+  text-align: left; color: var(--text-dim); padding: 0.3em 0.8em 0.3em 0;
+  font-weight: 500; white-space: nowrap; width: 1%;
+}
+.meta-table td { padding: 0.3em 0; }
+.badge-on { color: var(--green); font-weight: 600; }
+.badge-off { color: var(--text-dim); }
+.note { color: var(--text-dim); font-size: 0.78em; font-style: italic; margin-top: 0.3em; }
+footer { color: var(--text-dim); font-size: 0.75em; margin-top: 2em; text-align: center; }
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+  <div>
+    <h1>Konfiguration — Industriemechaniker_Alsdorf</h1>
+    <p class="lead">Industriemechaniker / Schlossermeister im Raum Alsdorf / Aachen (Vollzeit)</p>
+  </div>
+  <a href="index.html" class="back-link">&larr; zurueck zu den Ergebnissen</a>
+</header>
+
+<div class="section">
+  <h2>Standort &amp; Radius</h2>
+  <table class="meta-table"><tr><th>Heimat-Adresse</th><td>Alsdorf Zentrum, 52477 Alsdorf</td></tr><tr><th>Zentrum</th><td>Alsdorf</td></tr><tr><th>Radius (Kern)</th><td>30 km</td></tr><tr><th>Radius (erweitert)</th><td>50 km</td></tr><tr><th>Remote</th><td>Nein — Vor-Ort-Stelle erforderlich</td></tr></table><h3>Orte im Kernbereich</h3><div class="chips"><span class="chip chip-include">Alsdorf</span><span class="chip chip-include">Aachen</span><span class="chip chip-include">Eschweiler</span><span class="chip chip-include">Stolberg</span><span class="chip chip-include">Wuerselen</span><span class="chip chip-include">Baesweiler</span><span class="chip chip-include">Herzogenrath</span><span class="chip chip-include">Dueren</span><span class="chip chip-include">Jülich</span><span class="chip chip-include">Heinsberg</span><span class="chip chip-include">Geilenkirchen</span><span class="chip chip-include">Erkelenz</span><span class="chip chip-include">Hueckelhoven</span><span class="chip chip-include">Uebach-Palenberg</span></div><h3>Ausgeschlossene Orte</h3><p class="empty">—</p>
+</div>
+
+<div class="section">
+  <h2>Suchbegriffe</h2>
+  <div class="chips"><span class="chip chip-include">Industriemechaniker</span><span class="chip chip-include">Industriemechanikerin</span><span class="chip chip-include">Industriemechaniker Instandhaltung</span><span class="chip chip-include">Schlossermeister</span><span class="chip chip-include">Schlosser Meister</span><span class="chip chip-include">Metallbauer</span><span class="chip chip-include">Metallbaumeister</span><span class="chip chip-include">Metallbaumeisterin</span><span class="chip chip-include">Metallbau Meister</span><span class="chip chip-include">Meister Metallbau</span><span class="chip chip-include">Meister im Metallbau</span><span class="chip chip-include">Metallbaumeister im Handwerk</span><span class="chip chip-include">Handwerksmeister Metallbau</span><span class="chip chip-include">Mechaniker Instandhaltung</span><span class="chip chip-include">Instandhaltungsmechaniker</span><span class="chip chip-include">Wartungstechniker</span><span class="chip chip-include">Servicetechniker Metall</span><span class="chip chip-include">Schlosser Instandhaltung</span></div>
+</div>
+
+<div class="section">
+  <h2>Quellen (aktive)</h2>
+  <p class="note">URLs werden von bekannten API-Keys bereinigt.
+     POST-Body-Inhalte werden nicht angezeigt.</p>
+  <div class="source-card"><div class="source-head"><strong>Bundesagentur fuer Arbeit (Industriemechaniker/Schlossermeister, Alsdorf 100km)</strong><span class="flags">GET</span></div><div class="source-parser">Parser: <code>arbeitsagentur</code></div><ul class="url-list"><li><a href="https://rest.arbeitsagentur.de/jobboerse/jobsuche-service/pc/v4/jobs?was=Industriemechaniker&amp;wo=Alsdorf&amp;umkreis=100&amp;angebotsart=1&amp;page=1&amp;size=50&amp;pav=false" target="_blank" rel="noopener noreferrer">https://rest.arbeitsagentur.de/jobboerse/jobsuche-service/pc/v4/jobs?was=Industriemechaniker&amp;wo=Alsdorf&amp;umkreis=100&amp;angebotsart=1&amp;page=1&amp;size=50&amp;pav=false</a></li><li><a href="https://rest.arbeitsagentur.de/jobboerse/jobsuche-service/pc/v4/jobs?was=Industriemechaniker+Instandhaltung&amp;wo=Alsdorf&amp;umkreis=100&amp;angebotsart=1&amp;page=1&amp;size=50&amp;pav=false" target="_blank" rel="noopener noreferrer">https://rest.arbeitsagentur.de/jobboerse/jobsuche-service/pc/v4/jobs?was=Industriemechaniker+Instandhaltung&amp;wo=Alsdorf&amp;umkreis=100&amp;angebotsart=1&amp;page=1&amp;size=50&amp;pav=false</a></li><li><a href="https://rest.arbeitsagentur.de/jobboerse/jobsuche-service/pc/v4/jobs?was=Schlossermeister&amp;wo=Alsdorf&amp;umkreis=100&amp;angebotsart=1&amp;page=1&amp;size=50&amp;pav=false" target="_blank" rel="noopener noreferrer">https://rest.arbeitsagentur.de/jobboerse/jobsuche-service/pc/v4/jobs?was=Schlossermeister&amp;wo=Alsdorf&amp;umkreis=100&amp;angebotsart=1&amp;page=1&amp;size=50&amp;pav=false</a></li><li><a href="https://rest.arbeitsagentur.de/jobboerse/jobsuche-service/pc/v4/jobs?was=Schlosser&amp;wo=Alsdorf&amp;umkreis=100&amp;angebotsart=1&amp;page=1&amp;size=50&amp;pav=false" target="_blank" rel="noopener noreferrer">https://rest.arbeitsagentur.de/jobboerse/jobsuche-service/pc/v4/jobs?was=Schlosser&amp;wo=Alsdorf&amp;umkreis=100&amp;angebotsart=1&amp;page=1&amp;size=50&amp;pav=false</a></li><li><a href="https://rest.arbeitsagentur.de/jobboerse/jobsuche-service/pc/v4/jobs?was=Metallbauer&amp;wo=Alsdorf&amp;umkreis=100&amp;angebotsart=1&amp;page=1&amp;size=50&amp;pav=false" target="_blank" rel="noopener noreferrer">https://rest.arbeitsagentur.de/jobboerse/jobsuche-service/pc/v4/jobs?was=Metallbauer&amp;wo=Alsdorf&amp;umkreis=100&amp;angebotsart=1&amp;page=1&amp;size=50&amp;pav=false</a></li><li><a href="https://rest.arbeitsagentur.de/jobboerse/jobsuche-service/pc/v4/jobs?was=Metallbaumeister&amp;wo=Alsdorf&amp;umkreis=100&amp;angebotsart=1&amp;page=1&amp;size=50&amp;pav=false" target="_blank" rel="noopener noreferrer">https://rest.arbeitsagentur.de/jobboerse/jobsuche-service/pc/v4/jobs?was=Metallbaumeister&amp;wo=Alsdorf&amp;umkreis=100&amp;angebotsart=1&amp;page=1&amp;size=50&amp;pav=false</a></li><li><a href="https://rest.arbeitsagentur.de/jobboerse/jobsuche-service/pc/v4/jobs?was=Meister+Metallbau&amp;wo=Alsdorf&amp;umkreis=100&amp;angebotsart=1&amp;page=1&amp;size=50&amp;pav=false" target="_blank" rel="noopener noreferrer">https://rest.arbeitsagentur.de/jobboerse/jobsuche-service/pc/v4/jobs?was=Meister+Metallbau&amp;wo=Alsdorf&amp;umkreis=100&amp;angebotsart=1&amp;page=1&amp;size=50&amp;pav=false</a></li><li><a href="https://rest.arbeitsagentur.de/jobboerse/jobsuche-service/pc/v4/jobs?was=Instandhaltungsmechaniker&amp;wo=Alsdorf&amp;umkreis=100&amp;angebotsart=1&amp;page=1&amp;size=50&amp;pav=false" target="_blank" rel="noopener noreferrer">https://rest.arbeitsagentur.de/jobboerse/jobsuche-service/pc/v4/jobs?was=Instandhaltungsmechaniker&amp;wo=Alsdorf&amp;umkreis=100&amp;angebotsart=1&amp;page=1&amp;size=50&amp;pav=false</a></li><li><a href="https://rest.arbeitsagentur.de/jobboerse/jobsuche-service/pc/v4/jobs?was=Wartungstechniker&amp;wo=Alsdorf&amp;umkreis=100&amp;angebotsart=1&amp;page=1&amp;size=50&amp;pav=false" target="_blank" rel="noopener noreferrer">https://rest.arbeitsagentur.de/jobboerse/jobsuche-service/pc/v4/jobs?was=Wartungstechniker&amp;wo=Alsdorf&amp;umkreis=100&amp;angebotsart=1&amp;page=1&amp;size=50&amp;pav=false</a></li><li><a href="https://rest.arbeitsagentur.de/jobboerse/jobsuche-service/pc/v4/jobs?was=Mechaniker+Instandhaltung&amp;wo=Alsdorf&amp;umkreis=100&amp;angebotsart=1&amp;page=1&amp;size=50&amp;pav=false" target="_blank" rel="noopener noreferrer">https://rest.arbeitsagentur.de/jobboerse/jobsuche-service/pc/v4/jobs?was=Mechaniker+Instandhaltung&amp;wo=Alsdorf&amp;umkreis=100&amp;angebotsart=1&amp;page=1&amp;size=50&amp;pav=false</a></li></ul></div>
+<div class="source-card"><div class="source-head"><strong>StepStone DE (Industriemechaniker Aachen 50km)</strong><span class="flags">GET · Browser</span></div><div class="source-parser">Parser: <code>stepstone</code></div><ul class="url-list"><li><a href="https://www.stepstone.de/jobs/industriemechaniker/in-aachen?radius=50" target="_blank" rel="noopener noreferrer">https://www.stepstone.de/jobs/industriemechaniker/in-aachen?radius=50</a></li><li><a href="https://www.stepstone.de/jobs/schlosser/in-aachen?radius=50" target="_blank" rel="noopener noreferrer">https://www.stepstone.de/jobs/schlosser/in-aachen?radius=50</a></li><li><a href="https://www.stepstone.de/jobs/instandhaltung/in-aachen?radius=50" target="_blank" rel="noopener noreferrer">https://www.stepstone.de/jobs/instandhaltung/in-aachen?radius=50</a></li><li><a href="https://www.stepstone.de/jobs/metallbauer/in-aachen?radius=50" target="_blank" rel="noopener noreferrer">https://www.stepstone.de/jobs/metallbauer/in-aachen?radius=50</a></li><li><a href="https://www.stepstone.de/jobs/metallbaumeister/in-aachen?radius=50" target="_blank" rel="noopener noreferrer">https://www.stepstone.de/jobs/metallbaumeister/in-aachen?radius=50</a></li><li><a href="https://www.stepstone.de/jobs/schlossermeister/in-aachen?radius=50" target="_blank" rel="noopener noreferrer">https://www.stepstone.de/jobs/schlossermeister/in-aachen?radius=50</a></li></ul></div>
+<div class="source-card"><div class="source-head"><strong>LinkedIn Jobs DE (Industriemechaniker Aachen)</strong><span class="flags">GET · Browser</span></div><div class="source-parser">Parser: <code>linkedin</code></div><ul class="url-list"><li><a href="https://www.linkedin.com/jobs/search/?keywords=Industriemechaniker&amp;location=Aachen" target="_blank" rel="noopener noreferrer">https://www.linkedin.com/jobs/search/?keywords=Industriemechaniker&amp;location=Aachen</a></li><li><a href="https://www.linkedin.com/jobs/search/?keywords=Schlossermeister&amp;location=Aachen" target="_blank" rel="noopener noreferrer">https://www.linkedin.com/jobs/search/?keywords=Schlossermeister&amp;location=Aachen</a></li><li><a href="https://www.linkedin.com/jobs/search/?keywords=Instandhaltung&amp;location=Aachen" target="_blank" rel="noopener noreferrer">https://www.linkedin.com/jobs/search/?keywords=Instandhaltung&amp;location=Aachen</a></li><li><a href="https://www.linkedin.com/jobs/search/?keywords=Metallbauer&amp;location=Aachen" target="_blank" rel="noopener noreferrer">https://www.linkedin.com/jobs/search/?keywords=Metallbauer&amp;location=Aachen</a></li></ul></div>
+<div class="source-card"><div class="source-head"><strong>Karriere.NRW (oeffentliche Stellen NRW)</strong><span class="flags">GET</span></div><div class="source-parser">Parser: <code>karriere_nrw</code></div><ul class="url-list"><li><a href="https://api.karriere.nrw/v1.0/stellenausschreibungen/" target="_blank" rel="noopener noreferrer">https://api.karriere.nrw/v1.0/stellenausschreibungen/</a></li></ul></div>
+</div>
+
+<div class="section">
+  <h2>Filter — Titel muss enthalten</h2>
+  <div class="chips"><span class="chip chip-include">Industriemechaniker</span><span class="chip chip-include">Industriemechanikerin</span><span class="chip chip-include">Schlossermeister</span><span class="chip chip-include">Schlosser Meister</span><span class="chip chip-include">Schlosser</span><span class="chip chip-include">Instandhalter</span><span class="chip chip-include">Instandhaltung</span><span class="chip chip-include">Metallbauer</span><span class="chip chip-include">Metallbaumeister</span><span class="chip chip-include">Metallbaumeisterin</span><span class="chip chip-include">Meister Metallbau</span><span class="chip chip-include">Meister im Metallbau</span><span class="chip chip-include">Wartungstechniker</span><span class="chip chip-include">Servicetechniker</span><span class="chip chip-include">Mechaniker Instandhaltung</span><span class="chip chip-include">Produktionstechniker</span><span class="chip chip-include">Mechatroniker</span></div>
+</div>
+
+<div class="section">
+  <h2>Filter — Titel darf nicht enthalten</h2>
+  <div class="chips"><span class="chip chip-exclude">Ausbildung</span><span class="chip chip-exclude">Auszubildender</span><span class="chip chip-exclude">Auszubildende</span><span class="chip chip-exclude">Azubi</span><span class="chip chip-exclude">Praktikum</span><span class="chip chip-exclude">Praktikant</span><span class="chip chip-exclude">Werkstudent</span><span class="chip chip-exclude">Trainee</span><span class="chip chip-exclude">duales Studium</span><span class="chip chip-exclude">duale Studentin</span><span class="chip chip-exclude">Dualer Student</span><span class="chip chip-exclude">Studierende</span><span class="chip chip-exclude">Verdrahtung</span><span class="chip chip-exclude">Elektroeinrichtungen</span><span class="chip chip-exclude">Elektroniker</span><span class="chip chip-exclude">MSR Technik</span><span class="chip chip-exclude">SPS Programmierung</span><span class="chip chip-exclude">Schlosserhelfer</span><span class="chip chip-exclude">Kfz-Schlosser</span></div>
+</div>
+
+<div class="section">
+  <h2>Filter — Beschreibung darf nicht enthalten</h2>
+  <div class="chips"><span class="chip chip-exclude">Zeitarbeit</span><span class="chip chip-exclude">Arbeitnehmerueberlassung</span><span class="chip chip-exclude">Arbeitnehmerüberlassung</span><span class="chip chip-exclude">Leiharbeit</span><span class="chip chip-exclude">Leiharbeiter</span><span class="chip chip-exclude">AÜG</span><span class="chip chip-exclude">AUeG</span><span class="chip chip-exclude">ANUe</span><span class="chip chip-exclude">ANÜ</span><span class="chip chip-exclude">Personaldienstleister</span><span class="chip chip-exclude">im Rahmen der Arbeitnehmerueberlassung</span><span class="chip chip-exclude">im Rahmen der Arbeitnehmerüberlassung</span><span class="chip chip-exclude">Verdrahtung</span><span class="chip chip-exclude">Elektroeinrichtungen</span><span class="chip chip-exclude">Elektroniker</span><span class="chip chip-exclude">MSR Technik</span><span class="chip chip-exclude">SPS Programmierung</span><span class="chip chip-exclude">Schlosserhelfer</span><span class="chip chip-exclude">Kfz-Schlosser</span></div>
+</div>
+
+<div class="section">
+  <h2>Arbeitsstunden-Filter</h2>
+  <p>Status: <span class="badge-on">aktiv</span> · Mindeststunden pro Woche: <strong>35.0 h</strong></p>
+</div>
+
+<div class="section">
+  <h2>Highlight-Begriffe</h2>
+  <p class="note">Stellen mit diesen Begriffen werden auf der Ergebnis-Seite hervorgehoben und nach oben sortiert.</p>
+  <div class="chips"><span class="chip chip-highlight">Konstruktionstechnik</span><span class="chip chip-highlight">oeffentlicher Dienst</span><span class="chip chip-highlight">öffentlicher Dienst</span></div>
+</div>
+
+<footer>Read-only Konfiguration &middot; Aktualisiert mit der Ergebnis-Seite</footer>
+</div>
+</body>
+</html>
