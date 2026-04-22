@@ -13,6 +13,10 @@
   --green: #00d68f;
   --red: #ff4444;
   --yellow: #ffc107;
+  /* 3-Stufen-Rating */
+  --rating-green: #00d68f;
+  --rating-yellow: #ffc107;
+  --rating-red: #ff4444;
   --text: #ffffff;
   --text-dim: rgba(255, 255, 255, 0.6);
   --text-muted: rgba(255, 255, 255, 0.35);
@@ -180,18 +184,19 @@ h1 { font-size: 1.4em; font-weight: 700; margin-bottom: 0.3em; }
   white-space: nowrap;
 }
 
-.job-row.is-dismissed {
-  opacity: 0.35;
+/* 3-Stufen-Rating: Rahmen-Farbe links + Opacity-Abschwaechung fuer dismissed */
+.job-row.rating-favorite {
+  border-left: 3px solid var(--rating-green);
 }
-
-.job-row.is-dismissed .job-title {
+.job-row.rating-compromise {
+  border-left: 3px solid var(--rating-yellow);
+}
+.job-row.rating-dismissed {
+  border-left: 3px solid var(--rating-red);
+  opacity: 0.45;
+}
+.job-row.rating-dismissed .job-title {
   text-decoration: line-through;
-}
-
-.job-row.is-dismissed .btn-dismiss {
-  color: var(--red);
-  border-color: rgba(255, 68, 68, 0.4);
-  background: rgba(255, 68, 68, 0.15);
 }
 
 
@@ -283,6 +288,70 @@ h1 { font-size: 1.4em; font-weight: 700; margin-bottom: 0.3em; }
   background: rgba(255, 193, 7, 0.15);
 }
 
+/* 3-Stufen-Rating Buttons (thumbs up/side/down) */
+.btn-rating {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+  -webkit-tap-highlight-color: transparent;
+  padding: 0;
+}
+.btn-rating .icon {
+  width: 18px;
+  height: 18px;
+}
+.btn-rating:active { transform: scale(0.9); }
+@media (hover: hover) {
+  .btn-rating-favorite:hover {
+    color: var(--rating-green);
+    border-color: rgba(0, 214, 143, 0.45);
+    background: rgba(0, 214, 143, 0.12);
+  }
+  .btn-rating-compromise:hover {
+    color: var(--rating-yellow);
+    border-color: rgba(255, 193, 7, 0.45);
+    background: rgba(255, 193, 7, 0.12);
+  }
+  .btn-rating-dismissed:hover {
+    color: var(--rating-red);
+    border-color: rgba(255, 68, 68, 0.45);
+    background: rgba(255, 68, 68, 0.12);
+  }
+}
+.btn-rating-favorite.active {
+  color: var(--rating-green);
+  border-color: rgba(0, 214, 143, 0.55);
+  background: rgba(0, 214, 143, 0.2);
+}
+.btn-rating-compromise.active {
+  color: var(--rating-yellow);
+  border-color: rgba(255, 193, 7, 0.55);
+  background: rgba(255, 193, 7, 0.2);
+}
+.btn-rating-dismissed.active {
+  color: var(--rating-red);
+  border-color: rgba(255, 68, 68, 0.55);
+  background: rgba(255, 68, 68, 0.2);
+}
+
+/* Farbige Toggle-Filter-Buttons (rating-spezifisch) */
+.toolbar .tb.tb-favorite { color: var(--rating-green); border-color: rgba(0, 214, 143, 0.3); }
+.toolbar .tb.tb-compromise { color: var(--rating-yellow); border-color: rgba(255, 193, 7, 0.3); }
+.toolbar .tb.tb-dismissed { color: var(--rating-red); border-color: rgba(255, 68, 68, 0.3); }
+.toolbar .tb.toggle-off {
+  opacity: 0.4;
+  text-decoration: line-through;
+}
+.toolbar .tb .icon { width: 14px; height: 14px; vertical-align: middle; }
+
 .btn-maps {
   font-size: 0.9em;
 }
@@ -324,82 +393,102 @@ h1 { font-size: 1.4em; font-weight: 700; margin-bottom: 0.3em; }
 <body>
 <div class="container">
 <h1>Stellensuche &mdash; industriemechaniker_alsdorf</h1>
-<div class="build-info">Gebaut: 22.04.2026 16:40 · Daten: 2.1 h alt</div>
+<div class="build-info">Gebaut: 22.04.2026 19:11 · Daten: 4.6 h alt</div>
 <div class="header-buttons">
   <a href="karte.html" class="map-btn"><span class="ic">&#128506;</span> Karte mit allen Stellen</a>
   <a href="config.html" class="map-btn"><span class="ic">&#9881;</span> Konfiguration</a>
+  <a href="insights.html" class="map-btn"><span class="ic">&#128269;</span> Musteranalyse</a>
+  <a href="suggested_sources.html" class="map-btn"><span class="ic">&#128279;</span> Quellen-Vorschlaege</a>
 </div>
 <div class="header-row">
   <span class="meta">42 Treffer</span>
   <div class="toolbar">
-    <button class="tb" onclick="filterView('all')" id="tb-all">Alle</button>
-    <button class="tb" onclick="filterView('unmarked')" id="tb-unmarked">Unmarkierte</button>
-    <button class="tb" onclick="filterView('favs')" id="tb-favs">★ Merkliste</button>
-    <button class="tb" onclick="filterView('dismissed')" id="tb-dismissed">✕ Aussortiert</button>
+    <button class="tb" onclick="toggleFilter('unmarked')" id="tf-unmarked"
+            title="Unmarkierte Stellen zeigen/verbergen">Unmarkiert</button>
+    <button class="tb tb-favorite" onclick="toggleFilter('favorite')" id="tf-favorite"
+            title="Favoriten zeigen/verbergen">
+      <svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg> Favoriten
+    </button>
+    <button class="tb tb-compromise" onclick="toggleFilter('compromise')" id="tf-compromise"
+            title="Kompromisse zeigen/verbergen">
+      <svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg> Kompromiss
+    </button>
+    <button class="tb tb-dismissed" onclick="toggleFilter('dismissed')" id="tf-dismissed"
+            title="Aussortierte zeigen/verbergen">
+      <svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg> Aussortiert
+    </button>
     <button class="tb" onclick="setupGistSync()" id="tb-sync"
             title="Markierungen mit GitHub Gist synchronisieren">↻ Sync</button>
     <span id="sync-status" class="sync-status"></span>
   </div>
 </div>
-<div class="source-group"><h2>arbeitsagentur <span class="count">(42)</span></h2><div class="job-row highlight" id="job-f3cfeea315c5"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1001189713-S" target="_blank" class="job-link"><span class="job-title">2581) Metallbauer/Metallbauerin Fachrichtung Konstruktionstechnik (m/w/d)<span class="highlight-badge" title="Highlight: Konstruktionstechnik">Konstruktionstechnik</span></span><span class="job-meta"><span class="job-company">RE-WE-STA Metallbau GmbH &amp; Co. KG</span><span class="job-loc">52351 Düren, Rheinland (25 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'f3cfeea315c5')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'f3cfeea315c5')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('52351 Düren, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
-<div class="job-row highlight" id="job-548941523685"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002338771-S" target="_blank" class="job-link"><span class="job-title">2582) Metallbauer Konstruktionstechnik (m/w/d)<span class="highlight-badge" title="Highlight: Konstruktionstechnik">Konstruktionstechnik</span></span><span class="job-meta"><span class="job-company">EKÜ GmbH</span><span class="job-loc">52351 Düren, Rheinland (25 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'548941523685')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'548941523685')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('52351 Düren, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
-<div class="job-row highlight" id="job-4ce9094dc5cf"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002958443-S" target="_blank" class="job-link"><span class="job-title">2596) Metallbauer Konstruktionstechnik (m/w/d) Tagesschicht<span class="highlight-badge" title="Highlight: Konstruktionstechnik">Konstruktionstechnik</span></span><span class="job-meta"><span class="job-company">Impuls Personal GmbH</span><span class="job-loc">Hennef (Sieg)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'4ce9094dc5cf')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'4ce9094dc5cf')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('Hennef (Sieg)')" title="Route in Google Maps">🗺</button></div></div>
-<div class="job-row" id="job-f95c10706065"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1000598906-S" target="_blank" class="job-link"><span class="job-title">2555) Schlosser (m/w/d)</span><span class="job-meta"><span class="job-company">Personalhaus Bielefeld GmbH &amp; Co. KG</span><span class="job-loc">52249 Eschweiler, Rheinland (10 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'f95c10706065')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'f95c10706065')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('52249 Eschweiler, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
-<div class="job-row" id="job-2c405febe96f"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002491055-S" target="_blank" class="job-link"><span class="job-title">2556) Schlosser (m/w/d)</span><span class="job-meta"><span class="job-company">EKÜ GmbH</span><span class="job-loc">52428 Jülich (15 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'2c405febe96f')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'2c405febe96f')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('52428 Jülich')" title="Route in Google Maps">🗺</button></div></div>
-<div class="job-row" id="job-1a713eed681d"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002903195-S" target="_blank" class="job-link"><span class="job-title">2557) Industriemechaniker</span><span class="job-meta"><span class="job-company">Drehmo Industrietechnik GmbH</span><span class="job-loc">52372 Kreuzau (27 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'1a713eed681d')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'1a713eed681d')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('52372 Kreuzau')" title="Route in Google Maps">🗺</button></div></div>
-<div class="job-row" id="job-43783c6e9bfd"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/11852-933842229-S" target="_blank" class="job-link"><span class="job-title">2558) Industriemechaniker (m/w/d)</span><span class="job-meta"><span class="job-company">TimePartner Personalmanagement GmbH</span><span class="job-loc">52351 Düren, Rheinland (25 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'43783c6e9bfd')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'43783c6e9bfd')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('52351 Düren, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
-<div class="job-row" id="job-74579c062741"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/12122-204304-1757440-0-S" target="_blank" class="job-link"><span class="job-title">2559) Industriemechaniker (m/w/d)</span><span class="job-meta"><span class="job-company">persona service AG &amp; Co. KG Beratung Leasing Vermittlung</span><span class="job-loc">52349 Düren, Rheinland (24 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'74579c062741')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'74579c062741')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('52349 Düren, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
-<div class="job-row" id="job-0bff8eabc451"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002510685-S" target="_blank" class="job-link"><span class="job-title">2560) Industriemechaniker (m/w/d)</span><span class="job-meta"><span class="job-company">DirectDa Personal West GmbH</span><span class="job-loc">Düren, Rheinland (22 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'0bff8eabc451')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'0bff8eabc451')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('Düren, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
-<div class="job-row" id="job-cae40ff74be4"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/13424-21L5FW5L3W0DX3W7-S" target="_blank" class="job-link"><span class="job-title">2561)  Industriemechaniker/Mechatroniker (m/w/d)</span><span class="job-meta"><span class="job-company">AUREA GmbH</span><span class="job-loc">50189 Elsdorf, Rheinland (29 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'cae40ff74be4')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'cae40ff74be4')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('50189 Elsdorf, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
-<div class="job-row" id="job-f8cabaa19280"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10000-1205607201-S" target="_blank" class="job-link"><span class="job-title">2562) Industriemechaniker/in / Zerspanungsmechaniker</span><span class="job-meta"><span class="job-company">Gebr. Ludwigs GmbH &amp; Co. KG</span><span class="job-loc">52355 Düren, Rheinland (23 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'f8cabaa19280')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'f8cabaa19280')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('52355 Düren, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
-<div class="job-row" id="job-6efde92286b6"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002338572-S" target="_blank" class="job-link"><span class="job-title">2563) Industriemechaniker Instandhaltung (m/w/d)</span><span class="job-meta"><span class="job-company">EKÜ GmbH</span><span class="job-loc">52351 Düren, Rheinland (25 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'6efde92286b6')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'6efde92286b6')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('52351 Düren, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
-<div class="job-row" id="job-3cd2a392b9a1"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002706478-S" target="_blank" class="job-link"><span class="job-title">2564) Industriemechaniker / Mechatroniker (m/w/d)</span><span class="job-meta"><span class="job-company">Job Aktuell Personalberatungs GmbH</span><span class="job-loc">52349 Düren, Rheinland (24 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'3cd2a392b9a1')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'3cd2a392b9a1')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('52349 Düren, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
-<div class="job-row" id="job-a19886310926"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1001409430-S" target="_blank" class="job-link"><span class="job-title">2565) Industriemechaniker / Schlosser (m/w/d)</span><span class="job-meta"><span class="job-company">M. Schall GmbH &amp; Co. KG Zelte- u. Planenfabrik</span><span class="job-loc">52399 Merzenich, Kreis Düren (26 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'a19886310926')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'a19886310926')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('52399 Merzenich, Kreis Düren')" title="Route in Google Maps">🗺</button></div></div>
-<div class="job-row" id="job-4d32526f6ea8"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1001169779-S" target="_blank" class="job-link"><span class="job-title">2566) Industriemechaniker / Metallbauer</span><span class="job-meta"><span class="job-company">TS Elino GmbH</span><span class="job-loc">52355 Düren, Rheinland (23 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'4d32526f6ea8')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'4d32526f6ea8')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('52355 Düren, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
-<div class="job-row" id="job-907928280a23"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1000545211-S" target="_blank" class="job-link"><span class="job-title">2567) Industriemechaniker (m/w/d).Zerspanungsmechaniker m/w/d Feinwerkmechaniker m/w/d</span><span class="job-meta"><span class="job-company">BSA Engineering GmbH</span><span class="job-loc">50189 Elsdorf, Rheinland (29 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'907928280a23')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'907928280a23')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('50189 Elsdorf, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
-<div class="job-row" id="job-3e34f06fc290"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1001863749-S" target="_blank" class="job-link"><span class="job-title">2568) Betriebsschlosser/Industriemechaniker/Mechatroniker m/w/d</span><span class="job-meta"><span class="job-company">FP Fischer Personal GmbH</span><span class="job-loc">52349 Düren, Rheinland (24 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'3e34f06fc290')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'3e34f06fc290')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('52349 Düren, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
-<div class="job-row" id="job-260d1281e2f5"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002690119-S" target="_blank" class="job-link"><span class="job-title">2569) Industriemechaniker (m|w|d) in der mechanischen Instandhaltung</span><span class="job-meta"><span class="job-company">Voith GmbH &amp; Co. KG aA</span><span class="job-loc">52349 Düren, Rheinland (24 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'260d1281e2f5')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'260d1281e2f5')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('52349 Düren, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
-<div class="job-row" id="job-b2a45835d9aa"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002763493-S" target="_blank" class="job-link"><span class="job-title">2570) Betriebsschlosser (m/w/d)</span><span class="job-meta"><span class="job-company">timetable Fachpersonal GmbH</span><span class="job-loc">52399 Merzenich, Kreis Düren (26 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'b2a45835d9aa')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'b2a45835d9aa')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('52399 Merzenich, Kreis Düren')" title="Route in Google Maps">🗺</button></div></div>
-<div class="job-row" id="job-d2ddd227f311"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002062335-S" target="_blank" class="job-link"><span class="job-title">2571) Land- und Baumaschinenmechatroniker (m/w/d)</span><span class="job-meta"><span class="job-company">G.M.S Günter Meyer Gesellschaft für Fahrbahnsanierungen mbH</span><span class="job-loc">52399 Merzenich, Kreis Düren (26 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'d2ddd227f311')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'d2ddd227f311')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('52399 Merzenich, Kreis Düren')" title="Route in Google Maps">🗺</button></div></div>
-<div class="job-row" id="job-3f2e9f5eeb59"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/12913-4d42947f95610dc9-S" target="_blank" class="job-link"><span class="job-title">2572) Schlosser mit Zusatzqualifikation Kesselwärter (m/w/d)</span><span class="job-meta"><span class="job-company">Unique Personalservice GmbH NL Düren</span><span class="job-loc">52349 Düren, Rheinland (24 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'3f2e9f5eeb59')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'3f2e9f5eeb59')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('52349 Düren, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
-<div class="job-row" id="job-b6a9dfc56660"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/12828-2IT1MTSQJNUFGJ5P-S" target="_blank" class="job-link"><span class="job-title">2573) Betriebsschlosser (m/w/d) (Merzenich)</span><span class="job-meta"><span class="job-company">timetable Fachpersonal GmbH</span><span class="job-loc">52399 Merzenich, Kreis Düren (26 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'b6a9dfc56660')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'b6a9dfc56660')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('52399 Merzenich, Kreis Düren')" title="Route in Google Maps">🗺</button></div></div>
-<div class="job-row" id="job-93141166dcc6"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/16918-RONCSHWII78H348E-S" target="_blank" class="job-link"><span class="job-title">2574) Betriebsschlosser (m/w/d)</span><span class="job-meta"><span class="job-company">PersEH  GmbH</span><span class="job-loc">52351 Düren, Rheinland (25 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'93141166dcc6')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'93141166dcc6')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('52351 Düren, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
-<div class="job-row" id="job-2dce889d8e21"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/18570-409A18-S" target="_blank" class="job-link"><span class="job-title">2575) Betriebsschlosser (m/w/d)</span><span class="job-meta"><span class="job-company">Job Base GmbH</span><span class="job-loc">52399 Merzenich, Kreis Düren (26 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'2dce889d8e21')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'2dce889d8e21')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('52399 Merzenich, Kreis Düren')" title="Route in Google Maps">🗺</button></div></div>
-<div class="job-row" id="job-036e1bd855ce"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/12122-204306-1757436-0-S" target="_blank" class="job-link"><span class="job-title">2576) Schlosser (m/w/d)</span><span class="job-meta"><span class="job-company">persona service AG &amp; Co. KG Beratung Leasing Vermittlung</span><span class="job-loc">52349 Düren, Rheinland (24 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'036e1bd855ce')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'036e1bd855ce')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('52349 Düren, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
-<div class="job-row" id="job-8f31dc2fc3f0"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002338740-S" target="_blank" class="job-link"><span class="job-title">2577) Schlosser (m/w/d)</span><span class="job-meta"><span class="job-company">EKÜ GmbH</span><span class="job-loc">52351 Düren, Rheinland (25 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'8f31dc2fc3f0')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'8f31dc2fc3f0')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('52351 Düren, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
-<div class="job-row" id="job-4a2c0c1d4185"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10000-1205579764-S" target="_blank" class="job-link"><span class="job-title">2578) Metallbauer/in m/w/d</span><span class="job-meta"><span class="job-company">Gebr. Rath Schlosserei Metallbau GmbH</span><span class="job-loc">52349 Düren, Rheinland (24 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'4a2c0c1d4185')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'4a2c0c1d4185')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('52349 Düren, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
-<div class="job-row" id="job-8f1866f568e9"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/16918-QELV1XXZUBW9YB10-S" target="_blank" class="job-link"><span class="job-title">2579) Metallbauer (m/w/d)</span><span class="job-meta"><span class="job-company">PersEH  GmbH</span><span class="job-loc">52351 Düren, Rheinland (25 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'8f1866f568e9')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'8f1866f568e9')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('52351 Düren, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
-<div class="job-row" id="job-3b16b827aca8"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10000-1166157900-S" target="_blank" class="job-link"><span class="job-title">2580) Metallbauer m/w/d</span><span class="job-meta"><span class="job-company">IMOTEC GmbH</span><span class="job-loc">50189 Elsdorf, Rheinland (29 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'3b16b827aca8')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'3b16b827aca8')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('50189 Elsdorf, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
-<div class="job-row" id="job-39cdb9468b11"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002718753-S" target="_blank" class="job-link"><span class="job-title">2583) NFZ-Mechatroniker (m/w/d)</span><span class="job-meta"><span class="job-company">Moeller Internationale Spedition + Logistik GmbH</span><span class="job-loc">52351 Düren, Rheinland (25 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'39cdb9468b11')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'39cdb9468b11')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('52351 Düren, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
-<div class="job-row" id="job-41e0089e9b70"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/16918-KK28ASBWP0N45F8J-S" target="_blank" class="job-link"><span class="job-title">2584) Industriemechaniker (M/W/D)</span><span class="job-meta"><span class="job-company">PersEH  GmbH</span><span class="job-loc">52372 Kreuzau (27 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'41e0089e9b70')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'41e0089e9b70')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('52372 Kreuzau')" title="Route in Google Maps">🗺</button></div></div>
-<div class="job-row" id="job-17a59d638916"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002752080-S" target="_blank" class="job-link"><span class="job-title">2585) Industriemechaniker (m/w/d)</span><span class="job-meta"><span class="job-company">A &amp; D Personaldienstleistungen e. K.</span><span class="job-loc">Flörsheim am Main</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'17a59d638916')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'17a59d638916')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('Flörsheim am Main')" title="Route in Google Maps">🗺</button></div></div>
-<div class="job-row" id="job-bf93a2eddf75"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1001824610-S" target="_blank" class="job-link"><span class="job-title">2586) Industriemechaniker (m/w/d)</span><span class="job-meta"><span class="job-company">Kristall Personalservice GmbH</span><span class="job-loc">Menden (Sauerland)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'bf93a2eddf75')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'bf93a2eddf75')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('Menden (Sauerland)')" title="Route in Google Maps">🗺</button></div></div>
-<div class="job-row" id="job-b77149b2217d"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/13643-1L_604373-S" target="_blank" class="job-link"><span class="job-title">2587) Industriemechaniker/CNC-Fachkraft (m/w/d)</span><span class="job-meta"><span class="job-company">Michael Page GmbH</span><span class="job-loc">Offenbach am Main</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'b77149b2217d')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'b77149b2217d')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('Offenbach am Main')" title="Route in Google Maps">🗺</button></div></div>
-<div class="job-row" id="job-49e80a6b2698"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002920231-S" target="_blank" class="job-link"><span class="job-title">2588) Schlosser (m/w/d) ab 20€/Std.</span><span class="job-meta"><span class="job-company">ibex personal</span><span class="job-loc">Mainz am Rhein</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'49e80a6b2698')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'49e80a6b2698')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('Mainz am Rhein')" title="Route in Google Maps">🗺</button></div></div>
-<div class="job-row" id="job-9b98af3eb157"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002265225-S" target="_blank" class="job-link"><span class="job-title">2589) Schlosser (m/w/d)</span><span class="job-meta"><span class="job-company">bindan GmbH &amp; Co. KG</span><span class="job-loc">Langenfeld (Rheinland)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'9b98af3eb157')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'9b98af3eb157')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('Langenfeld (Rheinland)')" title="Route in Google Maps">🗺</button></div></div>
-<div class="job-row" id="job-f35bdc8a3fe0"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002343967-S" target="_blank" class="job-link"><span class="job-title">2590) Betriebsschlosser (m/w/d)</span><span class="job-meta"><span class="job-company">Koch Personaldienstleistungen GmbH</span><span class="job-loc">Wetter (Ruhr)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'f35bdc8a3fe0')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'f35bdc8a3fe0')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('Wetter (Ruhr)')" title="Route in Google Maps">🗺</button></div></div>
-<div class="job-row" id="job-ce3bf1916988"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10000-1199440022-S" target="_blank" class="job-link"><span class="job-title">2591) Servicetechniker (m/w/d)</span><span class="job-meta"><span class="job-company">LiCONiC Services Deutschland GmbH</span><span class="job-loc"> <span class="warn">kein Ort</span></span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'ce3bf1916988')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'ce3bf1916988')" title="Nicht interessant">✕</button></div></div>
-<div class="job-row" id="job-15a0e027e3ef"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002387239-S" target="_blank" class="job-link"><span class="job-title">2592) ⚙⚡ SERVICETECHNIKER Produktionsmaschinen ⚙⚙ (m/w/d)</span><span class="job-meta"><span class="job-company">SAHR EXPERTS GmbH    </span><span class="job-loc">Mainz am Rhein</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'15a0e027e3ef')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'15a0e027e3ef')" title="Nicht interessant">✕</button><button class="btn-action btn-maps" onclick="openMaps('Mainz am Rhein')" title="Route in Google Maps">🗺</button></div></div>
-<div class="job-row" id="job-f369a880dfa3"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002800051-S" target="_blank" class="job-link"><span class="job-title">2593) Schlosser - / Schweißerin</span><span class="job-meta"><span class="job-company">SMP Simone Misselwitz Personaldienstleistungen</span><span class="job-loc"> <span class="warn">kein Ort</span></span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'f369a880dfa3')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'f369a880dfa3')" title="Nicht interessant">✕</button></div></div>
-<div class="job-row" id="job-1dc414e9dbfa"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002800098-S" target="_blank" class="job-link"><span class="job-title">2594) Betriebsschlosser/in</span><span class="job-meta"><span class="job-company">SMP Simone Misselwitz Personaldienstleistungen</span><span class="job-loc"> <span class="warn">kein Ort</span></span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'1dc414e9dbfa')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'1dc414e9dbfa')" title="Nicht interessant">✕</button></div></div>
-<div class="job-row" id="job-f6753773a440"><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1000327132-S" target="_blank" class="job-link"><span class="job-title">2595) Servicemonteur/in / Metallbauer/in</span><span class="job-meta"><span class="job-company">H. Jos. Trimborn Söhne Metallbau GmbH</span><span class="job-loc"> <span class="warn">kein Ort</span></span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-action btn-fav" onclick="toggleFav(this,'f6753773a440')" title="Merkliste">☆</button><button class="btn-action btn-dismiss" onclick="toggleDismiss(this,'f6753773a440')" title="Nicht interessant">✕</button></div></div></div>
+<div class="source-group"><h2>arbeitsagentur <span class="count">(42)</span></h2><div class="job-row highlight" id="job-f3cfeea315c5" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1001189713-S" target="_blank" class="job-link"><span class="job-title">2623) Metallbauer/Metallbauerin Fachrichtung Konstruktionstechnik (m/w/d)<span class="highlight-badge" title="Highlight: Konstruktionstechnik">Konstruktionstechnik</span></span><span class="job-meta"><span class="job-company">RE-WE-STA Metallbau GmbH &amp; Co. KG</span><span class="job-loc">52351 Düren, Rheinland (25 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'f3cfeea315c5','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'f3cfeea315c5','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'f3cfeea315c5','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button><button class="btn-action btn-maps" onclick="openMaps('52351 Düren, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row highlight" id="job-548941523685" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002338771-S" target="_blank" class="job-link"><span class="job-title">2624) Metallbauer Konstruktionstechnik (m/w/d)<span class="highlight-badge" title="Highlight: Konstruktionstechnik">Konstruktionstechnik</span></span><span class="job-meta"><span class="job-company">EKÜ GmbH</span><span class="job-loc">52351 Düren, Rheinland (25 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'548941523685','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'548941523685','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'548941523685','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button><button class="btn-action btn-maps" onclick="openMaps('52351 Düren, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row highlight" id="job-4ce9094dc5cf" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002958443-S" target="_blank" class="job-link"><span class="job-title">2638) Metallbauer Konstruktionstechnik (m/w/d) Tagesschicht<span class="highlight-badge" title="Highlight: Konstruktionstechnik">Konstruktionstechnik</span></span><span class="job-meta"><span class="job-company">Impuls Personal GmbH</span><span class="job-loc">Hennef (Sieg)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'4ce9094dc5cf','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'4ce9094dc5cf','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'4ce9094dc5cf','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button><button class="btn-action btn-maps" onclick="openMaps('Hennef (Sieg)')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-f95c10706065" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1000598906-S" target="_blank" class="job-link"><span class="job-title">2597) Schlosser (m/w/d)</span><span class="job-meta"><span class="job-company">Personalhaus Bielefeld GmbH &amp; Co. KG</span><span class="job-loc">52249 Eschweiler, Rheinland (10 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'f95c10706065','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'f95c10706065','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'f95c10706065','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button><button class="btn-action btn-maps" onclick="openMaps('52249 Eschweiler, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-2c405febe96f" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002491055-S" target="_blank" class="job-link"><span class="job-title">2598) Schlosser (m/w/d)</span><span class="job-meta"><span class="job-company">EKÜ GmbH</span><span class="job-loc">52428 Jülich (15 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'2c405febe96f','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'2c405febe96f','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'2c405febe96f','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button><button class="btn-action btn-maps" onclick="openMaps('52428 Jülich')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-1a713eed681d" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002903195-S" target="_blank" class="job-link"><span class="job-title">2599) Industriemechaniker</span><span class="job-meta"><span class="job-company">Drehmo Industrietechnik GmbH</span><span class="job-loc">52372 Kreuzau (27 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'1a713eed681d','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'1a713eed681d','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'1a713eed681d','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button><button class="btn-action btn-maps" onclick="openMaps('52372 Kreuzau')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-43783c6e9bfd" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/11852-933842229-S" target="_blank" class="job-link"><span class="job-title">2600) Industriemechaniker (m/w/d)</span><span class="job-meta"><span class="job-company">TimePartner Personalmanagement GmbH</span><span class="job-loc">52351 Düren, Rheinland (25 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'43783c6e9bfd','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'43783c6e9bfd','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'43783c6e9bfd','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button><button class="btn-action btn-maps" onclick="openMaps('52351 Düren, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-74579c062741" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/12122-204304-1757440-0-S" target="_blank" class="job-link"><span class="job-title">2601) Industriemechaniker (m/w/d)</span><span class="job-meta"><span class="job-company">persona service AG &amp; Co. KG Beratung Leasing Vermittlung</span><span class="job-loc">52349 Düren, Rheinland (24 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'74579c062741','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'74579c062741','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'74579c062741','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button><button class="btn-action btn-maps" onclick="openMaps('52349 Düren, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-0bff8eabc451" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002510685-S" target="_blank" class="job-link"><span class="job-title">2602) Industriemechaniker (m/w/d)</span><span class="job-meta"><span class="job-company">DirectDa Personal West GmbH</span><span class="job-loc">Düren, Rheinland (22 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'0bff8eabc451','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'0bff8eabc451','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'0bff8eabc451','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button><button class="btn-action btn-maps" onclick="openMaps('Düren, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-cae40ff74be4" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/13424-21L5FW5L3W0DX3W7-S" target="_blank" class="job-link"><span class="job-title">2603)  Industriemechaniker/Mechatroniker (m/w/d)</span><span class="job-meta"><span class="job-company">AUREA GmbH</span><span class="job-loc">50189 Elsdorf, Rheinland (29 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'cae40ff74be4','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'cae40ff74be4','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'cae40ff74be4','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button><button class="btn-action btn-maps" onclick="openMaps('50189 Elsdorf, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-f8cabaa19280" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10000-1205607201-S" target="_blank" class="job-link"><span class="job-title">2604) Industriemechaniker/in / Zerspanungsmechaniker</span><span class="job-meta"><span class="job-company">Gebr. Ludwigs GmbH &amp; Co. KG</span><span class="job-loc">52355 Düren, Rheinland (23 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'f8cabaa19280','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'f8cabaa19280','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'f8cabaa19280','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button><button class="btn-action btn-maps" onclick="openMaps('52355 Düren, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-6efde92286b6" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002338572-S" target="_blank" class="job-link"><span class="job-title">2605) Industriemechaniker Instandhaltung (m/w/d)</span><span class="job-meta"><span class="job-company">EKÜ GmbH</span><span class="job-loc">52351 Düren, Rheinland (25 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'6efde92286b6','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'6efde92286b6','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'6efde92286b6','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button><button class="btn-action btn-maps" onclick="openMaps('52351 Düren, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-3cd2a392b9a1" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002706478-S" target="_blank" class="job-link"><span class="job-title">2606) Industriemechaniker / Mechatroniker (m/w/d)</span><span class="job-meta"><span class="job-company">Job Aktuell Personalberatungs GmbH</span><span class="job-loc">52349 Düren, Rheinland (24 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'3cd2a392b9a1','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'3cd2a392b9a1','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'3cd2a392b9a1','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button><button class="btn-action btn-maps" onclick="openMaps('52349 Düren, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-a19886310926" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1001409430-S" target="_blank" class="job-link"><span class="job-title">2607) Industriemechaniker / Schlosser (m/w/d)</span><span class="job-meta"><span class="job-company">M. Schall GmbH &amp; Co. KG Zelte- u. Planenfabrik</span><span class="job-loc">52399 Merzenich, Kreis Düren (26 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'a19886310926','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'a19886310926','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'a19886310926','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button><button class="btn-action btn-maps" onclick="openMaps('52399 Merzenich, Kreis Düren')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-4d32526f6ea8" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1001169779-S" target="_blank" class="job-link"><span class="job-title">2608) Industriemechaniker / Metallbauer</span><span class="job-meta"><span class="job-company">TS Elino GmbH</span><span class="job-loc">52355 Düren, Rheinland (23 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'4d32526f6ea8','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'4d32526f6ea8','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'4d32526f6ea8','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button><button class="btn-action btn-maps" onclick="openMaps('52355 Düren, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-907928280a23" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1000545211-S" target="_blank" class="job-link"><span class="job-title">2609) Industriemechaniker (m/w/d).Zerspanungsmechaniker m/w/d Feinwerkmechaniker m/w/d</span><span class="job-meta"><span class="job-company">BSA Engineering GmbH</span><span class="job-loc">50189 Elsdorf, Rheinland (29 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'907928280a23','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'907928280a23','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'907928280a23','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button><button class="btn-action btn-maps" onclick="openMaps('50189 Elsdorf, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-3e34f06fc290" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1001863749-S" target="_blank" class="job-link"><span class="job-title">2610) Betriebsschlosser/Industriemechaniker/Mechatroniker m/w/d</span><span class="job-meta"><span class="job-company">FP Fischer Personal GmbH</span><span class="job-loc">52349 Düren, Rheinland (24 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'3e34f06fc290','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'3e34f06fc290','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'3e34f06fc290','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button><button class="btn-action btn-maps" onclick="openMaps('52349 Düren, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-260d1281e2f5" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002690119-S" target="_blank" class="job-link"><span class="job-title">2611) Industriemechaniker (m|w|d) in der mechanischen Instandhaltung</span><span class="job-meta"><span class="job-company">Voith GmbH &amp; Co. KG aA</span><span class="job-loc">52349 Düren, Rheinland (24 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'260d1281e2f5','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'260d1281e2f5','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'260d1281e2f5','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button><button class="btn-action btn-maps" onclick="openMaps('52349 Düren, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-b2a45835d9aa" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002763493-S" target="_blank" class="job-link"><span class="job-title">2612) Betriebsschlosser (m/w/d)</span><span class="job-meta"><span class="job-company">timetable Fachpersonal GmbH</span><span class="job-loc">52399 Merzenich, Kreis Düren (26 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'b2a45835d9aa','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'b2a45835d9aa','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'b2a45835d9aa','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button><button class="btn-action btn-maps" onclick="openMaps('52399 Merzenich, Kreis Düren')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-d2ddd227f311" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002062335-S" target="_blank" class="job-link"><span class="job-title">2613) Land- und Baumaschinenmechatroniker (m/w/d)</span><span class="job-meta"><span class="job-company">G.M.S Günter Meyer Gesellschaft für Fahrbahnsanierungen mbH</span><span class="job-loc">52399 Merzenich, Kreis Düren (26 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'d2ddd227f311','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'d2ddd227f311','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'d2ddd227f311','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button><button class="btn-action btn-maps" onclick="openMaps('52399 Merzenich, Kreis Düren')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-3f2e9f5eeb59" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/12913-4d42947f95610dc9-S" target="_blank" class="job-link"><span class="job-title">2614) Schlosser mit Zusatzqualifikation Kesselwärter (m/w/d)</span><span class="job-meta"><span class="job-company">Unique Personalservice GmbH NL Düren</span><span class="job-loc">52349 Düren, Rheinland (24 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'3f2e9f5eeb59','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'3f2e9f5eeb59','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'3f2e9f5eeb59','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button><button class="btn-action btn-maps" onclick="openMaps('52349 Düren, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-b6a9dfc56660" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/12828-2IT1MTSQJNUFGJ5P-S" target="_blank" class="job-link"><span class="job-title">2615) Betriebsschlosser (m/w/d) (Merzenich)</span><span class="job-meta"><span class="job-company">timetable Fachpersonal GmbH</span><span class="job-loc">52399 Merzenich, Kreis Düren (26 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'b6a9dfc56660','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'b6a9dfc56660','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'b6a9dfc56660','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button><button class="btn-action btn-maps" onclick="openMaps('52399 Merzenich, Kreis Düren')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-93141166dcc6" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/16918-RONCSHWII78H348E-S" target="_blank" class="job-link"><span class="job-title">2616) Betriebsschlosser (m/w/d)</span><span class="job-meta"><span class="job-company">PersEH  GmbH</span><span class="job-loc">52351 Düren, Rheinland (25 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'93141166dcc6','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'93141166dcc6','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'93141166dcc6','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button><button class="btn-action btn-maps" onclick="openMaps('52351 Düren, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-2dce889d8e21" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/18570-409A18-S" target="_blank" class="job-link"><span class="job-title">2617) Betriebsschlosser (m/w/d)</span><span class="job-meta"><span class="job-company">Job Base GmbH</span><span class="job-loc">52399 Merzenich, Kreis Düren (26 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'2dce889d8e21','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'2dce889d8e21','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'2dce889d8e21','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button><button class="btn-action btn-maps" onclick="openMaps('52399 Merzenich, Kreis Düren')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-036e1bd855ce" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/12122-204306-1757436-0-S" target="_blank" class="job-link"><span class="job-title">2618) Schlosser (m/w/d)</span><span class="job-meta"><span class="job-company">persona service AG &amp; Co. KG Beratung Leasing Vermittlung</span><span class="job-loc">52349 Düren, Rheinland (24 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'036e1bd855ce','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'036e1bd855ce','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'036e1bd855ce','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button><button class="btn-action btn-maps" onclick="openMaps('52349 Düren, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-8f31dc2fc3f0" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002338740-S" target="_blank" class="job-link"><span class="job-title">2619) Schlosser (m/w/d)</span><span class="job-meta"><span class="job-company">EKÜ GmbH</span><span class="job-loc">52351 Düren, Rheinland (25 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'8f31dc2fc3f0','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'8f31dc2fc3f0','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'8f31dc2fc3f0','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button><button class="btn-action btn-maps" onclick="openMaps('52351 Düren, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-4a2c0c1d4185" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10000-1205579764-S" target="_blank" class="job-link"><span class="job-title">2620) Metallbauer/in m/w/d</span><span class="job-meta"><span class="job-company">Gebr. Rath Schlosserei Metallbau GmbH</span><span class="job-loc">52349 Düren, Rheinland (24 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'4a2c0c1d4185','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'4a2c0c1d4185','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'4a2c0c1d4185','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button><button class="btn-action btn-maps" onclick="openMaps('52349 Düren, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-8f1866f568e9" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/16918-QELV1XXZUBW9YB10-S" target="_blank" class="job-link"><span class="job-title">2621) Metallbauer (m/w/d)</span><span class="job-meta"><span class="job-company">PersEH  GmbH</span><span class="job-loc">52351 Düren, Rheinland (25 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'8f1866f568e9','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'8f1866f568e9','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'8f1866f568e9','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button><button class="btn-action btn-maps" onclick="openMaps('52351 Düren, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-3b16b827aca8" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10000-1166157900-S" target="_blank" class="job-link"><span class="job-title">2622) Metallbauer m/w/d</span><span class="job-meta"><span class="job-company">IMOTEC GmbH</span><span class="job-loc">50189 Elsdorf, Rheinland (29 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'3b16b827aca8','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'3b16b827aca8','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'3b16b827aca8','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button><button class="btn-action btn-maps" onclick="openMaps('50189 Elsdorf, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-39cdb9468b11" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002718753-S" target="_blank" class="job-link"><span class="job-title">2625) NFZ-Mechatroniker (m/w/d)</span><span class="job-meta"><span class="job-company">Moeller Internationale Spedition + Logistik GmbH</span><span class="job-loc">52351 Düren, Rheinland (25 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'39cdb9468b11','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'39cdb9468b11','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'39cdb9468b11','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button><button class="btn-action btn-maps" onclick="openMaps('52351 Düren, Rheinland')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-41e0089e9b70" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/16918-KK28ASBWP0N45F8J-S" target="_blank" class="job-link"><span class="job-title">2626) Industriemechaniker (M/W/D)</span><span class="job-meta"><span class="job-company">PersEH  GmbH</span><span class="job-loc">52372 Kreuzau (27 km)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'41e0089e9b70','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'41e0089e9b70','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'41e0089e9b70','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button><button class="btn-action btn-maps" onclick="openMaps('52372 Kreuzau')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-17a59d638916" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002752080-S" target="_blank" class="job-link"><span class="job-title">2627) Industriemechaniker (m/w/d)</span><span class="job-meta"><span class="job-company">A &amp; D Personaldienstleistungen e. K.</span><span class="job-loc">Flörsheim am Main</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'17a59d638916','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'17a59d638916','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'17a59d638916','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button><button class="btn-action btn-maps" onclick="openMaps('Flörsheim am Main')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-bf93a2eddf75" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1001824610-S" target="_blank" class="job-link"><span class="job-title">2628) Industriemechaniker (m/w/d)</span><span class="job-meta"><span class="job-company">Kristall Personalservice GmbH</span><span class="job-loc">Menden (Sauerland)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'bf93a2eddf75','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'bf93a2eddf75','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'bf93a2eddf75','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button><button class="btn-action btn-maps" onclick="openMaps('Menden (Sauerland)')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-b77149b2217d" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/13643-1L_604373-S" target="_blank" class="job-link"><span class="job-title">2629) Industriemechaniker/CNC-Fachkraft (m/w/d)</span><span class="job-meta"><span class="job-company">Michael Page GmbH</span><span class="job-loc">Offenbach am Main</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'b77149b2217d','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'b77149b2217d','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'b77149b2217d','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button><button class="btn-action btn-maps" onclick="openMaps('Offenbach am Main')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-49e80a6b2698" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002920231-S" target="_blank" class="job-link"><span class="job-title">2630) Schlosser (m/w/d) ab 20€/Std.</span><span class="job-meta"><span class="job-company">ibex personal</span><span class="job-loc">Mainz am Rhein</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'49e80a6b2698','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'49e80a6b2698','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'49e80a6b2698','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button><button class="btn-action btn-maps" onclick="openMaps('Mainz am Rhein')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-9b98af3eb157" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002265225-S" target="_blank" class="job-link"><span class="job-title">2631) Schlosser (m/w/d)</span><span class="job-meta"><span class="job-company">bindan GmbH &amp; Co. KG</span><span class="job-loc">Langenfeld (Rheinland)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'9b98af3eb157','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'9b98af3eb157','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'9b98af3eb157','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button><button class="btn-action btn-maps" onclick="openMaps('Langenfeld (Rheinland)')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-f35bdc8a3fe0" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002343967-S" target="_blank" class="job-link"><span class="job-title">2632) Betriebsschlosser (m/w/d)</span><span class="job-meta"><span class="job-company">Koch Personaldienstleistungen GmbH</span><span class="job-loc">Wetter (Ruhr)</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'f35bdc8a3fe0','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'f35bdc8a3fe0','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'f35bdc8a3fe0','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button><button class="btn-action btn-maps" onclick="openMaps('Wetter (Ruhr)')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-ce3bf1916988" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10000-1199440022-S" target="_blank" class="job-link"><span class="job-title">2633) Servicetechniker (m/w/d)</span><span class="job-meta"><span class="job-company">LiCONiC Services Deutschland GmbH</span><span class="job-loc"> <span class="warn">kein Ort</span></span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'ce3bf1916988','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'ce3bf1916988','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'ce3bf1916988','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button></div></div>
+<div class="job-row" id="job-15a0e027e3ef" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002387239-S" target="_blank" class="job-link"><span class="job-title">2634) ⚙⚡ SERVICETECHNIKER Produktionsmaschinen ⚙⚙ (m/w/d)</span><span class="job-meta"><span class="job-company">SAHR EXPERTS GmbH    </span><span class="job-loc">Mainz am Rhein</span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'15a0e027e3ef','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'15a0e027e3ef','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'15a0e027e3ef','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button><button class="btn-action btn-maps" onclick="openMaps('Mainz am Rhein')" title="Route in Google Maps">🗺</button></div></div>
+<div class="job-row" id="job-f369a880dfa3" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002800051-S" target="_blank" class="job-link"><span class="job-title">2635) Schlosser - / Schweißerin</span><span class="job-meta"><span class="job-company">SMP Simone Misselwitz Personaldienstleistungen</span><span class="job-loc"> <span class="warn">kein Ort</span></span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'f369a880dfa3','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'f369a880dfa3','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'f369a880dfa3','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button></div></div>
+<div class="job-row" id="job-1dc414e9dbfa" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1002800098-S" target="_blank" class="job-link"><span class="job-title">2636) Betriebsschlosser/in</span><span class="job-meta"><span class="job-company">SMP Simone Misselwitz Personaldienstleistungen</span><span class="job-loc"> <span class="warn">kein Ort</span></span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'1dc414e9dbfa','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'1dc414e9dbfa','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'1dc414e9dbfa','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button></div></div>
+<div class="job-row" id="job-f6753773a440" data-rating=""><a href="https://www.arbeitsagentur.de/jobsuche/jobdetail/10001-1000327132-S" target="_blank" class="job-link"><span class="job-title">2637) Servicemonteur/in / Metallbauer/in</span><span class="job-meta"><span class="job-company">H. Jos. Trimborn Söhne Metallbau GmbH</span><span class="job-loc"> <span class="warn">kein Ort</span></span><span class="job-date">22.04.</span></span></a><div class="job-actions"><button class="btn-rating btn-rating-favorite" onclick="setRating(this,'f6753773a440','favorite')" title="Sehr gut geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-favorite"/></svg></button><button class="btn-rating btn-rating-compromise" onclick="setRating(this,'f6753773a440','compromise')" title="Ok, mit Einschraenkungen"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-compromise"/></svg></button><button class="btn-rating btn-rating-dismissed" onclick="setRating(this,'f6753773a440','dismissed')" title="Nicht geeignet"><svg class="icon" aria-hidden="true"><use href="icons.svg#rating-dismissed"/></svg></button></div></div></div>
 </div>
 <script>
 var API = 'http://10.14.0.2:8517';
 var HOME = 'Alsdorf Zentrum, 52477 Alsdorf';
 var PROFILE = 'industriemechaniker_alsdorf';
-var currentFilter = 'all';
-// Offline-Modus: wenn API-Calls fehlschlagen (z.B. GitHub-Pages), fallback auf LocalStorage.
-// Beim ersten fehlgeschlagenen Call bleibt die Flag gesetzt.
 var OFFLINE = false;
 var LS_KEY = 'stellensuche-marks::' + PROFILE;
+var FILTER_KEY = 'stellensuche-filter::' + PROFILE;
+
+// ========== LocalStorage Rating-Modell (Ticket #79) ==========
+// Neue Struktur: drei Listen {favorites, compromises, dismissed}.
+// Alte Struktur ohne 'compromises' wird beim Laden toleriert.
 
 function _loadMarks() {
   try {
     var raw = localStorage.getItem(LS_KEY);
-    return raw ? JSON.parse(raw) : {favorites: [], dismissed: []};
+    var parsed = raw ? JSON.parse(raw) : null;
+    if (!parsed) return {favorites: [], compromises: [], dismissed: []};
+    return {
+      favorites: parsed.favorites || [],
+      compromises: parsed.compromises || [],
+      dismissed: parsed.dismissed || []
+    };
   } catch (e) {
-    return {favorites: [], dismissed: []};
+    return {favorites: [], compromises: [], dismissed: []};
   }
 }
 
@@ -407,13 +496,16 @@ function _saveMarks(marks) {
   try { localStorage.setItem(LS_KEY, JSON.stringify(marks)); } catch (e) {}
 }
 
-function _recordMark(jobId, kind, value) {
-  // kind: 'favorite' | 'dismissed'; value: true/false
+function _recordRating(jobId, rating) {
+  // rating: 'favorite'|'compromise'|'dismissed'|null — exklusiv (Radio-Verhalten)
   var marks = _loadMarks();
-  var list = marks[kind === 'favorite' ? 'favorites' : 'dismissed'];
-  var idx = list.indexOf(jobId);
-  if (value && idx < 0) list.push(jobId);
-  if (!value && idx >= 0) list.splice(idx, 1);
+  ['favorites', 'compromises', 'dismissed'].forEach(function(k) {
+    var i = marks[k].indexOf(jobId);
+    if (i >= 0) marks[k].splice(i, 1);
+  });
+  if (rating === 'favorite') marks.favorites.push(jobId);
+  else if (rating === 'compromise') marks.compromises.push(jobId);
+  else if (rating === 'dismissed') marks.dismissed.push(jobId);
   _saveMarks(marks);
   if (typeof _scheduleGistPush === 'function') _scheduleGistPush();
 }
@@ -427,8 +519,6 @@ function apiCall(endpoint, body) {
 }
 
 // ========== GitHub Gist Sync ==========
-// Speichert Markierungen in einem GitHub Gist, damit mehrere Geraete
-// (Smartphone unterwegs, Notebook zu Hause) den gleichen Stand sehen.
 var GIST_TOKEN_KEY = 'stellensuche-gh-token';
 var GIST_ID_KEY = 'stellensuche-gist-id::' + PROFILE;
 var GIST_FILENAME = 'stellensuche-marks-' + PROFILE + '.json';
@@ -441,23 +531,10 @@ function _setSyncStatus(text, cls) {
   el.className = 'sync-status ' + (cls || '');
 }
 
-// Saeubert + validiert GitHub-Tokens vor dem Einbauen in HTTP-Header.
-// Kontext: prompt()-Eingaben enthalten oft versehentlich einen Zeilenumbruch
-// oder Whitespace aus der Zwischenablage. Per RFC 7230 sind solche Zeichen
-// in Header-Werten nicht erlaubt — fetch() wirft dann im Browser
-// "TypeError: Failed to execute 'fetch' on 'Window': Invalid value".
-// Wir fangen das hier mit einer klaren Meldung ab, bevor es dazu kommt.
 function _sanitizeToken(raw) {
-  if (raw === null || raw === undefined) {
-    throw new Error('Token fehlt');
-  }
+  if (raw === null || raw === undefined) throw new Error('Token fehlt');
   var t = String(raw).trim();
-  if (!t) {
-    throw new Error('Token ist leer');
-  }
-  // Nur druckbare ASCII-Zeichen ohne Whitespace (0x21..0x7E) sind in
-  // einem GitHub-PAT erlaubt; alles andere (Newline, Tab, non-ASCII) macht
-  // den Authorization-Header ungueltig.
+  if (!t) throw new Error('Token ist leer');
   if (!/^[!-~]+$/.test(t)) {
     throw new Error('Token enthaelt ungueltige Zeichen (Zeilenumbruch, Leerzeichen o.ae.). '
       + 'Bitte Token neu einfuegen — am Stueck, ohne Umbrueche.');
@@ -474,21 +551,17 @@ function _ghHeaders(token) {
 }
 
 async function _findOrCreateGist(token) {
-  // 1) Liste Gists und suche einen mit dem erwarteten Dateinamen
   var resp = await fetch('https://api.github.com/gists?per_page=100', {headers: _ghHeaders(token)});
   if (!resp.ok) throw new Error('Gist-Liste fehlgeschlagen: ' + resp.status);
   var gists = await resp.json();
   for (var i = 0; i < gists.length; i++) {
-    if (gists[i].files && gists[i].files[GIST_FILENAME]) {
-      return gists[i].id;
-    }
+    if (gists[i].files && gists[i].files[GIST_FILENAME]) return gists[i].id;
   }
-  // 2) Nicht gefunden — neu anlegen (secret / nicht public)
   var create = await fetch('https://api.github.com/gists', {
     method: 'POST',
     headers: _ghHeaders(token),
     body: JSON.stringify({
-      description: 'Stellensuche-Markierungen Sync ({' + PROFILE + '})',
+      description: 'Stellensuche-Markierungen Sync (' + PROFILE + ')',
       public: false,
       files: _filesPayload(_loadMarks())
     })
@@ -501,6 +574,7 @@ async function _findOrCreateGist(token) {
 function _filesPayload(marks) {
   var enriched = {
     favorites: marks.favorites || [],
+    compromises: marks.compromises || [],
     dismissed: marks.dismissed || [],
     profile: PROFILE,
     synced_at: new Date().toISOString()
@@ -528,9 +602,6 @@ async function _pullGist(token, gistId) {
   try { return JSON.parse(file.content); } catch (e) { return null; }
 }
 
-// Laedt ein ggf. vorhandenes Token aus localStorage und saeubert es.
-// Wenn es unrettbar ungueltig ist (Zeilenumbruch, Steuerzeichen) wird es
-// verworfen — sonst haengt der Kunde in einer Fehlerschleife fest.
 function _loadStoredToken() {
   var raw = localStorage.getItem(GIST_TOKEN_KEY);
   if (!raw) return null;
@@ -549,12 +620,8 @@ function setupGistSync() {
   if (!token) {
     var entered = prompt('GitHub Personal Access Token mit Scope "gist" eingeben:');
     if (!entered) return;
-    try {
-      token = _sanitizeToken(entered);
-    } catch (e) {
-      _setSyncStatus('Sync-Fehler: ' + e.message, 'err');
-      return;
-    }
+    try { token = _sanitizeToken(entered); }
+    catch (e) { _setSyncStatus('Sync-Fehler: ' + e.message, 'err'); return; }
     localStorage.setItem(GIST_TOKEN_KEY, token);
   }
   _setSyncStatus('Sync wird eingerichtet...', 'busy');
@@ -571,7 +638,6 @@ function setupGistSync() {
 }
 
 function _mergeRemoteMarks(remote) {
-  // Merge remote → local (union). Beide Listen werden zusammengefuehrt.
   var local = _loadMarks();
   function union(a, b) {
     var s = {};
@@ -580,6 +646,7 @@ function _mergeRemoteMarks(remote) {
     return Object.keys(s);
   }
   local.favorites = union(local.favorites, remote.favorites);
+  local.compromises = union(local.compromises, remote.compromises);
   local.dismissed = union(local.dismissed, remote.dismissed);
   _saveMarks(local);
   _applyLocalMarks();
@@ -596,16 +663,13 @@ function _scheduleGistPush() {
     _patchGist(token, gistId, _loadMarks())
       .then(function() { _setSyncStatus('Sync aktiv', 'ok'); })
       .catch(function(err) { _setSyncStatus('Sync-Fehler: ' + err.message, 'err'); });
-  }, 1500);  // debounced 1.5s nach letzter Klick-Aktion
+  }, 1500);
 }
 
 function _initGistSync() {
   var token = _loadStoredToken();
   var gistId = localStorage.getItem(GIST_ID_KEY);
-  if (!token || !gistId) {
-    _setSyncStatus('Sync nicht eingerichtet', '');
-    return;
-  }
+  if (!token || !gistId) { _setSyncStatus('Sync nicht eingerichtet', ''); return; }
   _setSyncStatus('Sync wird abgeglichen...', 'busy');
   _pullGist(token, gistId).then(function(remote) {
     if (remote) _mergeRemoteMarks(remote);
@@ -628,92 +692,123 @@ function openMaps(destination) {
   window.open(url, '_blank');
 }
 
-function toggleFav(btn, jobId) {
-  if (_debounce('fav-' + jobId)) return;
-  var isActive = btn.classList.toggle('active');
-  btn.textContent = isActive ? '\u2605' : '\u2606';
-  _recordMark(jobId, 'favorite', isActive);  // immer lokal puffern
-  apiCall('/api/favorite', {job_id: jobId, value: isActive});
-  applyFilter();
-}
+// ========== 3-Stufen-Rating: Button-Aktion ==========
 
-function toggleDismiss(btn, jobId) {
-  if (_debounce('dis-' + jobId)) return;
+function setRating(btn, jobId, ratingKey) {
+  if (_debounce('rate-' + jobId)) return;
   var row = btn.closest('.job-row');
-  var isDismissed = row.classList.toggle('is-dismissed');
-  _recordMark(jobId, 'dismissed', isDismissed);  // immer lokal puffern
-  if (isDismissed) {
-    apiCall('/api/dismiss', {job_id: jobId});
-  } else {
-    apiCall('/api/undismiss', {job_id: jobId});
+  if (!row) return;
+  var currentRating = row.dataset.rating || '';
+  var newRating = (currentRating === ratingKey) ? '' : ratingKey;
+  // Alle 3 Rating-Klassen entfernen, dann neue setzen
+  row.classList.remove('rating-favorite', 'rating-compromise', 'rating-dismissed');
+  if (newRating) row.classList.add('rating-' + newRating);
+  row.dataset.rating = newRating;
+  // Buttons umschalten
+  row.querySelectorAll('.btn-rating').forEach(function(b) { b.classList.remove('active'); });
+  if (newRating) {
+    var active = row.querySelector('.btn-rating-' + newRating);
+    if (active) active.classList.add('active');
   }
+  _recordRating(jobId, newRating || null);
+  apiCall('/api/rating', {job_id: jobId, rating: newRating || null});
   applyFilter();
 }
 
-function filterView(mode) {
-  currentFilter = mode;
-  document.querySelectorAll('.toolbar .tb').forEach(function(b) { b.classList.remove('active'); });
-  document.getElementById('tb-' + mode).classList.add('active');
+// Legacy-Wrapper fuer evtl. noch verbliebene Aufrufer:
+function toggleFav(btn, jobId) {
+  var row = document.getElementById('job-' + jobId);
+  var rateBtn = row && row.querySelector('.btn-rating-favorite');
+  if (rateBtn) setRating(rateBtn, jobId, 'favorite');
+}
+function toggleDismiss(btn, jobId) {
+  var row = document.getElementById('job-' + jobId);
+  var rateBtn = row && row.querySelector('.btn-rating-dismissed');
+  if (rateBtn) setRating(rateBtn, jobId, 'dismissed');
+}
+
+// ========== Filter (4 Toggles, alle Default an, LocalStorage pro Profil) ==========
+
+function _loadFilterState() {
+  try {
+    var raw = localStorage.getItem(FILTER_KEY);
+    if (!raw) return {unmarked: true, favorite: true, compromise: true, dismissed: true};
+    var parsed = JSON.parse(raw);
+    return {
+      unmarked: parsed.unmarked !== false,
+      favorite: parsed.favorite !== false,
+      compromise: parsed.compromise !== false,
+      dismissed: parsed.dismissed !== false
+    };
+  } catch (e) {
+    return {unmarked: true, favorite: true, compromise: true, dismissed: true};
+  }
+}
+
+function _saveFilterState(state) {
+  try { localStorage.setItem(FILTER_KEY, JSON.stringify(state)); } catch (e) {}
+}
+
+function toggleFilter(kind) {
+  var state = _loadFilterState();
+  state[kind] = !state[kind];
+  _saveFilterState(state);
   applyFilter();
 }
 
 function applyFilter() {
+  var state = _loadFilterState();
+  ['unmarked', 'favorite', 'compromise', 'dismissed'].forEach(function(k) {
+    var el = document.getElementById('tf-' + k);
+    if (el) el.classList.toggle('toggle-off', !state[k]);
+  });
   var rows = document.querySelectorAll('.job-row');
-  var counts = {all: 0, favs: 0, dismissed: 0, unmarked: 0};
+  var counts = {unmarked: 0, favorite: 0, compromise: 0, dismissed: 0};
   rows.forEach(function(row) {
-    var isFav = row.querySelector('.btn-fav.active') !== null;
-    var isDis = row.classList.contains('is-dismissed');
-    counts.all++;
-    if (isFav) counts.favs++;
-    if (isDis) counts.dismissed++;
-    if (!isFav && !isDis) counts.unmarked++;
-    var show = true;
-    if (currentFilter === 'favs') show = isFav;
-    else if (currentFilter === 'dismissed') show = isDis;
-    else if (currentFilter === 'unmarked') show = !isFav && !isDis;
+    var rating = row.dataset.rating || '';
+    var key = rating || 'unmarked';
+    counts[key] = (counts[key] || 0) + 1;
+    var show = state[key];
     row.classList.toggle('hidden', !show);
   });
   document.querySelectorAll('.source-group').forEach(function(group) {
     var visible = group.querySelectorAll('.job-row:not(.hidden)').length;
     group.classList.toggle('hidden', visible === 0);
   });
-  document.getElementById('tb-all').textContent = 'Alle (' + counts.all + ')';
-  document.getElementById('tb-unmarked').textContent = 'Unmarkierte (' + counts.unmarked + ')';
-  document.getElementById('tb-favs').textContent = '\u2605 Merkliste (' + counts.favs + ')';
-  document.getElementById('tb-dismissed').textContent = '\u2715 Aussortiert (' + counts.dismissed + ')';
+  // Button-Labels halten sich aus Count-Updates heraus (Icons + Titel-Attribut
+  // reichen); das erspart brittle String-Manipulation und macht das JS kleiner.
 }
 
-function _applyFav(id) {
+// ========== Rating-Zustand aus Server / LocalStorage anwenden ==========
+
+function _applyRatingToRow(id, rating) {
   var row = document.getElementById('job-' + id);
   if (!row) return;
-  var btn = row.querySelector('.btn-fav');
-  if (btn && !btn.classList.contains('active')) {
-    btn.classList.add('active');
-    btn.textContent = '\u2605';
+  row.classList.remove('rating-favorite', 'rating-compromise', 'rating-dismissed');
+  row.querySelectorAll('.btn-rating').forEach(function(b) { b.classList.remove('active'); });
+  if (rating) {
+    row.classList.add('rating-' + rating);
+    var btn = row.querySelector('.btn-rating-' + rating);
+    if (btn) btn.classList.add('active');
   }
-}
-
-function _applyDismiss(id) {
-  var row = document.getElementById('job-' + id);
-  if (row && !row.classList.contains('is-dismissed')) {
-    row.classList.add('is-dismissed');
-  }
+  row.dataset.rating = rating || '';
 }
 
 function _applyLocalMarks() {
-  // Merge LocalStorage marks into the view — funktioniert auch im Offline-Modus (GitHub-Pages).
   var marks = _loadMarks();
-  (marks.favorites || []).forEach(_applyFav);
-  (marks.dismissed || []).forEach(_applyDismiss);
+  (marks.favorites || []).forEach(function(id) { _applyRatingToRow(id, 'favorite'); });
+  (marks.compromises || []).forEach(function(id) { _applyRatingToRow(id, 'compromise'); });
+  (marks.dismissed || []).forEach(function(id) { _applyRatingToRow(id, 'dismissed'); });
 }
 
 function loadStates() {
   fetch(API + '/api/states')
     .then(function(r) { return r.json(); })
     .then(function(data) {
-      (data.favorite_ids || []).forEach(_applyFav);
-      (data.dismissed_ids || []).forEach(_applyDismiss);
-      _applyLocalMarks();  // LocalStorage-Markierungen ebenfalls ueberlagern
+      (data.favorite_ids || []).forEach(function(id) { _applyRatingToRow(id, 'favorite'); });
+      (data.compromise_ids || []).forEach(function(id) { _applyRatingToRow(id, 'compromise'); });
+      (data.dismissed_ids || []).forEach(function(id) { _applyRatingToRow(id, 'dismissed'); });
+      _applyLocalMarks();
       applyFilter();
     })
     .catch(function() {
@@ -724,7 +819,7 @@ function loadStates() {
 }
 
 loadStates();
-filterView('all');
+applyFilter();
 _initGistSync();
 </script>
 </body>
